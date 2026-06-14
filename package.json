@@ -1,0 +1,14 @@
+﻿{
+  "name": "laslogtmx",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "features/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint"
+  }
+}
