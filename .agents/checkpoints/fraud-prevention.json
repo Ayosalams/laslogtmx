@@ -1,0 +1,47 @@
+{
+    "feature": "Fraud Prevention",
+    "status": "Completed",
+    "last_updated": "2026-06-15",
+    "completed": [
+        "Supabase fraud_flags table (email, ip, fingerprint, reason, created_at)",
+        "RPC assess_signup_risk — velocity + disposable email + pattern checks",
+        "RPC record_signup_fraud — logs signup_attempt + high_risk:* flags",
+        "Shared signUpWithFraudCheck helper (web + mobile)",
+        "Web signup IP capture via /api/auth/signup-risk",
+        "Make.com scenario blueprint at integrations/make/signup-fraud-velocity.json",
+        "README fraud prevention section"
+    ],
+    "rules": {
+        "velocity": {
+            "max_per_email_per_24h": 2,
+            "max_per_ip_per_24h": 2,
+            "max_per_fingerprint_per_24h": 2,
+            "enforcement": "Blocks signup before auth.users insert (assess_signup_risk RPC)"
+        },
+        "high_risk_flags": [
+            "disposable_email — temp-mail domains (mailinator, guerrillamail, etc.)",
+            "suspicious_local_part — test@, temp@, fake@, spam@, admin@ prefixes",
+            "plus_alias_pattern — user+123@ style alias farming",
+            "velocity_exceeded:* — logged but signup already blocked"
+        ],
+        "make_com_role": "Secondary alerting when velocity >= 2 or high_risk:* row inserted; writes make_velocity_alert rows"
+    },
+    "next_steps": [
+        "Apply migration 20240617000000_fraud_prevention.sql to Supabase",
+        "Create Make.com scenario from integrations/make/signup-fraud-velocity.json",
+        "Add Supabase Database Webhook on fraud_flags INSERT → MAKE_COM_FRAUD_WEBHOOK",
+        "Review fraud_flags weekly in Supabase dashboard (service role)",
+        "Optional Phase 2: CAPTCHA on repeated medium-risk attempts"
+    ],
+    "key_decisions": [
+        "Lean rules for one-man shop — no paid fraud vendor",
+        "Authoritative checks in Supabase RPC (not client-only)",
+        "fraud_flags doubles as velocity log (reason=signup_attempt) to avoid extra tables",
+        "Make.com is alerting layer, not primary gate",
+        "Mobile uses fingerprint only; web uses IP + fingerprint"
+    ],
+    "blockers": [
+        "Migration must be applied before signup checks work in production"
+    ],
+    "priority": "High (abuse prevention)"
+}

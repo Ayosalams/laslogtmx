@@ -1,0 +1,77 @@
+{
+  "name": "laslogTMX — Signup Fraud Velocity Check",
+  "description": "Secondary fraud layer: alert on velocity breaches and high-risk signups. Import modules into Make.com manually.",
+  "version": "2026-06-15",
+  "trigger": {
+    "module": "Webhooks > Custom webhook",
+    "name": "signup_fraud_webhook",
+    "notes": "Point Supabase Database Webhook (INSERT on fraud_flags) here, or call from app after signup."
+  },
+  "modules": [
+    {
+      "id": 1,
+      "service": "Webhooks",
+      "action": "Custom webhook",
+      "description": "Receives { email, ip, fingerprint, reason, created_at } from fraud_flags insert"
+    },
+    {
+      "id": 2,
+      "service": "Supabase",
+      "action": "Search rows",
+      "connection": "laslogTMX Supabase (service role)",
+      "table": "fraud_flags",
+      "filter": "reason = signup_attempt AND created_at >= {{addHours(now; -24)}} AND (email = {{1.email}} OR ip = {{1.ip}})",
+      "description": "Count signup attempts in last 24h for same email OR IP"
+    },
+    {
+      "id": 3,
+      "service": "Flow control",
+      "action": "Router",
+      "routes": [
+        {
+          "label": "velocity_exceeded",
+          "condition": "{{length(2)}} >= 2",
+          "actions": [
+            {
+              "service": "Supabase",
+              "action": "Insert a row",
+              "table": "fraud_flags",
+              "row": {
+                "email": "{{1.email}}",
+                "ip": "{{1.ip}}",
+                "fingerprint": "{{1.fingerprint}}",
+                "reason": "make_velocity_alert"
+              }
+            },
+            {
+              "service": "Email / Slack",
+              "action": "Send notification",
+              "message": "laslogTMX signup velocity alert: {{1.email}} / {{1.ip}} — {{length(2)}} attempts in 24h"
+            }
+          ]
+        },
+        {
+          "label": "high_risk_flag",
+          "condition": "{{1.reason}} starts with high_risk:",
+          "actions": [
+            {
+              "service": "Email / Slack",
+              "action": "Send notification",
+              "message": "High-risk signup flagged: {{1.email}} — {{1.reason}}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "rules": {
+    "velocity_limit_per_email_per_day": 2,
+    "velocity_limit_per_ip_per_day": 2,
+    "window_hours": 24,
+    "primary_enforcement": "Supabase RPC assess_signup_risk (blocks before account creation)",
+    "make_role": "Alerting + audit trail (make_velocity_alert rows)"
+  },
+  "env": {
+    "MAKE_COM_FRAUD_WEBHOOK": "Paste webhook URL from Module 1 into .env"
+  }
+}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { ChatChannel } from '../hooks/useChatChannels';
+import { ChatChannel } from '../types';
 
 interface Props {
   channel: ChatChannel;

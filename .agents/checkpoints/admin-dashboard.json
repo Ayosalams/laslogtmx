@@ -1,0 +1,39 @@
+{
+    "feature": "Admin Dashboard",
+    "status": "Completed",
+    "last_updated": "2026-06-15",
+    "completed": [
+        "features/admin/ module with types, constants, hooks, components, and AdminDashboardScreen",
+        "useAdminAccess — role = admin guard via AuthContext profile.role",
+        "useSupportTicketQueue — fetch/update support_tickets with company join, status actions",
+        "useCbleContentAdmin — upload materials (draft), toggle tier access (requiresFullAccess)",
+        "useUserManagement — view company details and team profiles",
+        "Three admin tabs: Support & Refunds, CBLE Content, Users",
+        "AdminGuard component for protected access with loading/denied states",
+        "Mobile: Admin tab in MainTabNavigator (hidden for non-admins via tabBarButton)",
+        "Web: /admin route with Tailwind UI mirroring mobile panels",
+        "Web: AdminNavLink in layout nav (visible only to admin users)",
+        "Design system: light theme, electric blue (#1E40AF), military time in header"
+    ],
+    "next_steps": [
+        "Add cble_materials Supabase table and wire real Storage uploads",
+        "Platform-wide admin RLS for cross-company ticket queue (laslog staff)",
+        "Real-time ticket queue updates via Supabase Realtime",
+        "User role editing and invitation flows from admin panel",
+        "Add admin tab icon (Ionicons) in mobile MainTabNavigator"
+    ],
+    "key_decisions": [
+        "Admin access gated on profile.role === 'admin' (company-scoped per existing RLS)",
+        "Support ticket actions map to existing SupportTicketStatus enum",
+        "CBLE content admin uses in-memory draft list until cble_materials table exists",
+        "Web admin page is Tailwind-native; mobile uses shared hooks + RN components"
+    ],
+    "blockers": [],
+    "build_status": {
+        "web": "PASS — next build succeeded (apps/web), /admin route included at 5.45 kB",
+        "mobile": "FAIL — pre-existing tsc error in features/expenses/screens/ExpenseListScreen.tsx (getParent on navigation type); admin module has no TS errors",
+        "typescript": "PASS for admin module — no admin-related tsc diagnostics",
+        "notes": "Root turbo build fails without packageManager field (pre-existing); SSR window warnings from Supabase auth during static generation (pre-existing)"
+    },
+    "market_opportunity": "Medium — enables company admins to manage refunds, CBLE content, and team visibility without leaving laslogTMX"
+}

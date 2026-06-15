@@ -1,1 +1,41 @@
-﻿{}
+﻿{
+    "name": "laslogTMX Multi-Agent System",
+    "version": "2026-06-13",
+    "description": "Orchestration for laslogTMX (Web + Mobile monorepo)",
+    "primary_domain": "laslogtmx.com",
+    "environments": [
+        "production",
+        "app",
+        "dev"
+    ],
+    "default_agent": "Grok",
+    "agents": [
+        {
+            "name": "Grok",
+            "role": "Project Lead & Planner",
+            "strength": "Strategy, brutal honesty, checkpoint management, user communication"
+        },
+        {
+            "name": "Claude Opus 4.7",
+            "role": "Backend & Complex Logic",
+            "strength": "Supabase, RLS, integrations, architecture"
+        },
+        {
+            "name": "Gemini 3.1 Pro",
+            "role": "UI/UX & Frontend",
+            "strength": "React Native, Tailwind, clean mobile interfaces"
+        },
+        {
+            "name": "Grok Build",
+            "role": "Fast Coding & Refactoring",
+            "strength": "Quick implementation, terminal-based tasks"
+        }
+    ],
+    "checkpoint_folder": ".agents/checkpoints/",
+    "required_skills": [
+        "lasbrandSKILL.md",
+        "webbuildSKILL.md",
+        "mobileSKILL.md"
+    ],
+    "workflow": "Grok plans → Specialist agent executes → Grok reviews & creates checkpoint"
+}

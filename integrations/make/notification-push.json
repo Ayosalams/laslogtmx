@@ -1,0 +1,26 @@
+{
+  "name": "laslogTMX Notification Push Dispatch",
+  "description": "Supabase Database Webhook on notifications INSERT → dispatch Expo/Web push via app API",
+  "trigger": {
+    "type": "webhook",
+    "source": "supabase",
+    "table": "notifications",
+    "event": "INSERT"
+  },
+  "action": {
+    "type": "http",
+    "method": "POST",
+    "url": "{{WEB_APP_URL}}/api/push/send",
+    "headers": {
+      "Authorization": "Bearer {{PUSH_WEBHOOK_SECRET}}",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "user_id": "{{record.user_id}}",
+      "title": "{{record.title}}",
+      "body": "{{record.body}}",
+      "data": "{{record.data}}"
+    }
+  },
+  "notes": "Configure Supabase Database Webhook on public.notifications INSERT to call this scenario, or wire directly to the HTTP action URL."
+}

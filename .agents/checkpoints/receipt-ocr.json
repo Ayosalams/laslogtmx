@@ -1,0 +1,42 @@
+{
+    "feature": "Receipt OCR + Mandatory Correction",
+    "status": "Completed",
+    "last_updated": "2026-06-15",
+    "completed": [
+        "ReceiptCaptureScreen with expo-camera live capture + expo-image-picker gallery upload",
+        "useReceiptOcr hook with Google ML Kit text recognition + heuristic fallback parser",
+        "parseReceiptText utility extracting amount, date, merchant, category, military time",
+        "ReceiptCorrectionScreen — mandatory review checkbox before save (amount, date, merchant, category)",
+        "ExpenseListScreen tab with scan CTA and company-scoped expense list",
+        "useExpenses hook — Supabase insert/select with company_id isolation + receipt storage upload",
+        "Supabase migration: expenses table + receipts storage bucket + RLS policies",
+        "Navigation wired: Expenses tab, ReceiptCapture/ReceiptCorrection stack screens",
+        "Light theme UI with electric blue (#00bfff) accents and military time in headers",
+        "Mobile app.config camera/photo permissions + ML Kit dependency"
+    ],
+    "next_steps": [
+        "Apply supabase/migrations/20240620000000_expenses.sql via supabase db push",
+        "Run expo prebuild for native ML Kit on device builds (Expo Go uses fallback OCR)",
+        "Add manual expense entry without receipt scan",
+        "QuickBooks expense sync via Make.com integration",
+        "Expense filters, export, and per-load attribution"
+    ],
+    "key_decisions": [
+        "ML Kit primary with demo fallback when native module unavailable (Expo Go)",
+        "Mandatory user_confirmed gate — save blocked until checkbox + field validation pass",
+        "Military time stored as HH:MM text; display respects SettingsContext toggle",
+        "Receipt images uploaded to private receipts/{company_id}/ path in Supabase Storage",
+        "Expense categories aligned with carrier workflows: fuel, maintenance, tolls, food, lodging, supplies, other"
+    ],
+    "blockers": [
+        "Run expenses migration before live Supabase saves will work"
+    ],
+    "build_status": {
+        "mobile_typecheck": "passed",
+        "root_typecheck": "passed",
+        "mobile_expo_start": "not_run",
+        "turbo_build_mobile": "skipped — turbo packageManager config missing (pre-existing)",
+        "notes": "npm install --legacy-peer-deps succeeded; expo-camera, expo-image-picker, @react-native-ml-kit/text-recognition added"
+    },
+    "market_opportunity": "High — core TMS differentiator for owner-operators and small fleets tracking road expenses"
+}

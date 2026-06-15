@@ -1,0 +1,39 @@
+{
+    "feature": "CBLE Prep",
+    "status": "Completed",
+    "last_updated": "2026-06-15",
+    "completed": [
+        "features/cble-prep/ module with CbleLibraryScreen, CbleMaterialCard, useCbleAccess",
+        "Tier gating: Pro Broker+ required; full library on annual billing",
+        "Strong disclaimers on every material (internal training, LAS pronunciation)",
+        "Placeholder content with TODO comments for podcasts, videos, PDFs",
+        "Shared subscription constants (SUBSCRIPTION_TIERS, CBLE_MIN_TIER, CBLE_INCLUDED_VALUE)",
+        "Company subscription_tier + billing_interval fields (migration + seed)",
+        "AuthContext integration via company fields in useCbleAccess hook",
+        "Military time timestamps on material cards via formatMessageTime",
+        "Pricing page: Pro Broker plan, CBLE spotlight, comparison table column",
+        "Settings/Profile: subscription tier and CBLE access level (web + mobile)",
+        "FEATURES.cblePrep constant added",
+        "CBLE tab integrated in mobile MainTabNavigator"
+    ],
+    "next_steps": [
+        "Upload real CBLE assets to Supabase Storage and wire assetPath URLs",
+        "Add cble_material_progress table for completion tracking",
+        "Build material detail player/viewer screens (podcast, video, PDF)",
+        "Connect Stripe/billing to subscription_tier and billing_interval updates",
+        "Add web /cble-prep route for browser access"
+    ],
+    "key_decisions": [
+        "Gating reads company.subscription_tier and billing_interval from AuthContext",
+        "Monthly Pro Broker gets preview materials; yearly unlocks full library",
+        "Disclaimers on every card plus banner on library screen — not official CBLE/CBP material",
+        "Pro Broker added as distinct pricing tier ($199/mo, $1990/yr) with $299 CBLE value on annual"
+    ],
+    "blockers": [],
+    "build_status": {
+        "web": "PASS — next build succeeded (apps/web)",
+        "typescript": "PASS — tsc --noEmit",
+        "notes": "SSR window warnings from Supabase auth during static generation (pre-existing); turbo workspace resolution requires packageManager field in root package.json"
+    },
+    "market_opportunity": "High — customs brokers need internal training tools; differentiator for Pro Broker tier"
+}
