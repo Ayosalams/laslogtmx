@@ -1,0 +1,22 @@
+# Project-scoped MCP servers for laslogTMX (loaded by Grok Build CLI).
+# Secrets use ${VAR} expansion from Windows User environment variables.
+# Apply Antigravity config: .\infra\mcp\apply-mcp-config.ps1
+
+[mcp_servers.github]
+command = "C:/Program Files/Docker/Docker/resources/bin/docker.exe"
+args = ["run", "-i", "--rm", "--pull=missing", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"]
+enabled = true
+startup_timeout_sec = 30
+
+[mcp_servers.supabase]
+url = "https://mcp.supabase.com/mcp?project_ref=${SUPABASE_PROJECT_REF}"
+enabled = true
+
+[mcp_servers.supabase.headers]
+Authorization = "Bearer ${SUPABASE_ACCESS_TOKEN}"
+
+[mcp_servers.grok-build]
+command = "${LOCALAPPDATA}/../.local/bin/uv"
+args = ["run", "${USERPROFILE}/.grok-mcp/grok_delegate_mcp.py"]
+enabled = true
+startup_timeout_sec = 30

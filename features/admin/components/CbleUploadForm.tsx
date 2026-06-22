@@ -63,7 +63,7 @@ export const CbleUploadForm: React.FC<Props> = ({ saving, onSubmit }) => {
     <View style={styles.card}>
       <Text style={styles.title}>Upload New Material</Text>
       <Text style={styles.hint}>
-        Placeholder upload flow — assets will sync to Supabase Storage when backend is wired.
+        Placeholder upload flow — assets organized in features/cble-prep/assets/ (audio, videos, pdfs, powerpoint, etc). Sync to Supabase Storage when backend wired.
       </Text>
 
       <Text style={styles.label}>Title</Text>
@@ -120,7 +120,7 @@ export const CbleUploadForm: React.FC<Props> = ({ saving, onSubmit }) => {
         style={styles.input}
         value={assetPath}
         onChangeText={setAssetPath}
-        placeholder="cble/pdfs/example.pdf"
+        placeholder="features/cble-prep/assets/pdfs/example.pdf"
         placeholderTextColor="#94A3B8"
         autoCapitalize="none"
       />

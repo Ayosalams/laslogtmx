@@ -5,6 +5,13 @@ export type NotificationType =
   | 'motus_update'
   | 'cble_material';
 
+export type LoadMatchReason = 'city' | 'route' | 'rate';
+
+export interface PreferredRoute {
+  origin: string;
+  destination: string;
+}
+
 export interface NotificationRecord {
   id: string;
   user_id: string;
@@ -21,6 +28,10 @@ export interface NotificationSettings {
   user_id: string;
   company_id: string | null;
   preferred_cities: string[];
+  preferred_routes: PreferredRoute[];
+  min_rate_cents: number | null;
+  rate_alert_enabled: boolean;
+  external_loads_enabled: boolean;
   enabled_types: Record<NotificationType, boolean>;
   quiet_hours_start: string | null;
   quiet_hours_end: string | null;

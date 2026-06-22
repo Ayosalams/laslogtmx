@@ -1,0 +1,64 @@
+{
+    "feature": "Web Parity — Major Features",
+    "status": "Completed",
+    "last_updated": "2026-06-21",
+    "backup_branch": "backup-before-web-gaps-fix",
+    "completed": [
+        "Chat: /chat list + /chat/[channelId] room with Supabase realtime, refund intent, report",
+        "Chat Phase 2: placeholder avatars, typing indicators (broadcast), read receipts (broadcast)",
+        "MOTUS: /motus hub + /motus/status, /motus/dot-claim, /motus/troubleshooting, /motus/documents",
+        "MOTUS documents: localStorage persistence via useDocumentUploadsWeb, file picker wired",
+        "Receipt OCR: /receipts upload + /receipts/correct mandatory correction (Tesseract.js + fallback)",
+        "Expenses: /expenses list mirroring mobile ExpenseListScreen with OCR + manual entry CTAs",
+        "Detention timer: full integration — auto-start on load assignment, claim generation, load detail + expenses",
+        "CBLE Prep: /cble gated library + functional material viewer (audio/video/pdf via /api/cble-assets)",
+        "Load Board: /load-board + /load-board/[id] (pre-existing — post, bid, contract preview)",
+        "Shared FeatureShell + AppNav; home dashboard feature cards; electric blue (#00bfff) theme",
+        "Military time via useCurrentTime / useMilitaryClock on all feature screens"
+    ],
+    "routes": [
+        "/chat",
+        "/chat/[channelId]",
+        "/motus",
+        "/motus/status",
+        "/motus/dot-claim",
+        "/motus/troubleshooting",
+        "/motus/documents",
+        "/expenses",
+        "/receipts",
+        "/receipts/correct",
+        "/cble",
+        "/load-board",
+        "/load-board/[id]",
+        "/api/cble-assets/[...path]"
+    ],
+    "next_steps": [
+        "Apply pending Supabase migrations (chat, expenses, load_board, detention) to production",
+        "Auth-gated layout redirect for unauthenticated users on app routes",
+        "Persist MOTUS document uploads to Supabase Storage + motus_submissions table",
+        "Wire FMCSA status checker to live SAFER API",
+        "Server-side message read receipts (message_reads table) instead of broadcast-only"
+    ],
+    "remaining_gaps": [
+        "MOTUS document uploads are localStorage-only (no Supabase persistence yet)",
+        "FMCSA status checker uses demo data, not live API",
+        "Chat read receipts are ephemeral (broadcast) — no server-side persistence",
+        "Some CBLE placeholder materials lack on-disk assets (viewer shows fallback)",
+        "Tesseract OCR first load downloads ~2MB language pack (client-side)"
+    ],
+    "key_decisions": [
+        "Web components live in features/*/components/*Web.tsx reusing shared hooks",
+        "FeatureShell in packages/shared/components for cross-feature layout",
+        "Receipt draft passed via sessionStorage between capture and correction",
+        "Detention timer uses localStorage on web (AsyncStorage on mobile)",
+        "CBLE assets served from features/cble-prep/assets via Next.js API route",
+        "tesseract.js added to apps/web for browser OCR"
+    ],
+    "build_status": {
+        "web_build": "PASS",
+        "web_tsc": "PASS — npx tsc --noEmit (2026-06-21, includes detention-timer integration)",
+        "mobile_tsc": "PASS — npx tsc --noEmit (2026-06-21)",
+        "routes_built": 26,
+        "notes": "next build succeeded with .env.example placeholder Supabase vars; SSR window warnings from Supabase auth (pre-existing)"
+    }
+}

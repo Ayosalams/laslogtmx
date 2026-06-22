@@ -33,9 +33,10 @@
     ],
     "checkpoint_folder": ".agents/checkpoints/",
     "required_skills": [
+        "safetySKILL.md",
         "lasbrandSKILL.md",
         "webbuildSKILL.md",
         "mobileSKILL.md"
     ],
-    "workflow": "Grok plans → Specialist agent executes → Grok reviews & creates checkpoint"
+    "workflow": "SAFETY CHECK (read safetySKILL.md) → Grok plans (with safety adherence stated) → Specialist agent executes → Grok reviews & creates checkpoint"
 }

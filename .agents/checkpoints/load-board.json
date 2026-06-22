@@ -1,0 +1,83 @@
+{
+    "feature": "Internal Load Board + Smart Load Matching Notifications",
+    "status": "Completed",
+    "last_updated": "2026-06-22",
+    "completed": [
+        "features/load-board/ module (screens, components, hooks, utils)",
+        "Supabase migration: loads extension, load_bids, load_contracts + RLS (idempotent — safe to re-run)",
+        "Company is_laslog_verified + company_type fields",
+        "Broker post flow (LoadBoardScreen + web /load-board)",
+        "Carrier bid flow (BidForm + useBidding)",
+        "Real-time negotiation via existing Chat System (load-specific channels)",
+        "Auto contract generation RPC (generate_load_contract) + ContractPreview",
+        "laslogTMX Verified badge on all internal loads",
+        "Mobile Loads tab (gated to verified participants)",
+        "Web routes /load-board and /load-board/[id]",
+        "Backup branch: backup-before-load-board",
+        "FEATURES.internalLoadBoard constant",
+        "Smart Load Matching: preferred cities + routes in notification settings",
+        "Rate alerts (min_rate_cents threshold)",
+        "Cross-tenant internal board match trigger (carriers notified on broker posts)",
+        "useLoadMatchPreferences, useLoadMatchNotifications, useMatchedLoads hooks",
+        "LoadMatchSettingsWeb + LoadMatchSettingsMobile UI with military time",
+        "Load board match badges + match count banner",
+        "Premium UI: subtle glass on LoadCard / BidForm / headers / key cards (Best Balance)",
+        "iOS Live Activity + Widget scaffolding (detention + loads)",
+        "Make.com placeholder: integrations/make/external-load-match.json",
+        "External load webhook: POST /api/load-match/external",
+        "Migration 20240623000000_load_match_notifications.sql"
+    ],
+    "migration_idempotency": {
+        "20240621000000_load_board.sql": {
+            "status": "idempotent",
+            "verified": "2026-06-21",
+            "patterns": [
+                "CREATE TABLE IF NOT EXISTS (load_bids, load_contracts)",
+                "DROP POLICY IF EXISTS before every CREATE POLICY (loads, load_bids, load_contracts, channels)",
+                "DROP TRIGGER IF EXISTS before every CREATE TRIGGER (updated_at on load_bids, load_contracts)",
+                "CREATE OR REPLACE FUNCTION (is_verified_load_board_participant, is_broker_company, is_carrier_company, generate_load_contract)",
+                "CREATE INDEX IF NOT EXISTS, ADD COLUMN IF NOT EXISTS, ALTER ENABLE RLS (no-op if already enabled)"
+            ],
+            "notes": "Re-running no longer raises 'policy already exists' or 'trigger already exists' errors."
+        }
+    },
+    "next_steps": [
+        "Apply migrations 20240621000000_load_board.sql (idempotent) and 20240623000000_load_match_notifications.sql to Supabase",
+        "Configure Supabase DB webhook on notifications INSERT → /api/push/send",
+        "Wire Make.com external load scenario with LOAD_MATCH_WEBHOOK_SECRET",
+        "Upload generated PDFs to Supabase Storage bucket load-contracts",
+        "Wire e-signature provider (DocuSign/HelloSign) to replace placeholders",
+        "Add admin UI to toggle is_laslog_verified on companies"
+    ],
+    "key_decisions": [
+        "Internal only — no public load board; tab hidden for unverified users",
+        "Cross-tenant read limited to open internal board loads via RLS helper functions",
+        "Load match notifications use user's company_id (isolation) but match loads from any verified broker",
+        "Rate alerts can fire standalone or combined with city/route matches",
+        "External loads via Make.com webhook — no DB insert, notification-only placeholder",
+        "Reused channels/messages for load-specific negotiation chat",
+        "Contract PDF via browser print on web; contract_body stored in DB from RPC",
+        "Brokers = pro_broker/enterprise + company_type broker/mixed + verified",
+        "Carriers = pro+ + company_type carrier/mixed + verified"
+    ],
+    "blockers": [
+        "Apply remaining migrations (load_match_notifications) to Supabase before live testing",
+        "Set LOAD_MATCH_WEBHOOK_SECRET and PUSH_WEBHOOK_SECRET in production env"
+    ],
+    "build_status": {
+        "web": "PASS — npx tsc --noEmit in apps/web (2026-06-21)",
+        "mobile": "PASS — npx tsc --noEmit in apps/mobile; zero load-match errors (2026-06-21)",
+        "typescript_load_board": "PASS — zero errors in features/load-board/",
+        "typescript_load_match": "PASS — hooks, utils, settings UI compile clean",
+        "notes": "Full static export still requires NEXT_PUBLIC_SUPABASE_* in .env.local (pre-existing). Root turbo build blocked by missing packageManager in package.json (pre-existing)."
+    },
+    "premium_ui_enhancements_2026-06-22": {
+        "scope": "Best Balance — subtle targeted glassmorphism (modals/sheets, LoadCards, headers, BidForm, Detention banners, Receipt Correction cards). iOS Live Activity + Widget scaffold. Android clean fallback.",
+        "shared_util": "packages/shared/src/utils/glass.ts (web classes + RN getGlassCardStyle + highlight)",
+        "files_updated": "Header, CustomHeader, LoadCard, BidForm, Detention*Banner*, ReceiptCorrection*, RefundRequestSheet, app.config, LiveActivityWidgetBridge, load-board checkpoint",
+        "last_updated": "2026-06-22",
+        "backup": "backup-before-premium-ui",
+        "perf_impact": "Minimal (CSS blur web-only; RN rgba+border, 1 highlight view per surface)",
+        "visual": "Electric blue accents preserved, professional light theme, sunlight readable, no full-app glass"
+    }
+}

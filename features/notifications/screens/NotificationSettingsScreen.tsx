@@ -16,8 +16,8 @@ import { usePushRegistration } from '../../../packages/shared/src/notifications/
 import {
   NOTIFICATION_TYPE_LABELS,
   NOTIFICATION_TYPE_DESCRIPTIONS,
-  SUGGESTED_CITIES,
 } from '../../../packages/shared/src/notifications/constants';
+import { LoadMatchSettingsMobile } from '../../load-board/components/LoadMatchSettingsMobile';
 import { NotificationType } from '../../../packages/shared/src/notifications/types';
 import { useCurrentTime } from '../../../packages/shared/src/hooks/useCurrentTime';
 import { NotificationInbox } from '../components/NotificationInbox';
@@ -44,22 +44,9 @@ export const NotificationSettingsScreen: React.FC<Props> = ({ onRegisterPush }) 
     error,
     saveSettings,
     toggleType,
-    addCity,
-    removeCity,
   } = useNotificationSettings(user?.id, profile?.company_id);
   const { registerPush } = usePushRegistration(user?.id, profile?.company_id);
-  const [cityInput, setCityInput] = useState('');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-
-  const handleAddCity = async () => {
-    const result = await addCity(cityInput);
-    if (!result.error) {
-      setCityInput('');
-      setStatusMessage(null);
-    } else {
-      setStatusMessage(result.error.message);
-    }
-  };
 
   const handleEnablePush = async () => {
     if (!onRegisterPush) {
@@ -167,51 +154,7 @@ export const NotificationSettingsScreen: React.FC<Props> = ({ onRegisterPush }) 
         ))}
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Preferred Cities</Text>
-        <Text style={styles.help}>
-          Load match alerts fire when origin or destination matches a city you add.
-        </Text>
-
-        <View style={styles.cityInputRow}>
-          <TextInput
-            style={styles.cityInput}
-            placeholder="Add city (e.g. Chicago)"
-            value={cityInput}
-            onChangeText={setCityInput}
-            autoCapitalize="words"
-          />
-          <TouchableOpacity style={styles.addButton} onPress={handleAddCity} disabled={saving}>
-            <Text style={styles.addButtonText}>Add</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.chipRow}>
-          {SUGGESTED_CITIES.map((city) => (
-            <TouchableOpacity
-              key={city}
-              style={styles.suggestChip}
-              onPress={() => addCity(city)}
-              disabled={saving}
-            >
-              <Text style={styles.suggestChipText}>+ {city}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        <View style={styles.chipRow}>
-          {settings.preferred_cities.map((city) => (
-            <TouchableOpacity
-              key={city}
-              style={styles.cityChip}
-              onPress={() => removeCity(city)}
-              disabled={saving}
-            >
-              <Text style={styles.cityChipText}>{city} ×</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
+      <LoadMatchSettingsMobile />
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quiet Hours</Text>

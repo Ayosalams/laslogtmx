@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
   cardLocked: {
     opacity: 0.65,
     backgroundColor: '#F8FAFC',
+    borderColor: '#00BFFF', // Electric Blue for restricted content
   },
   headerRow: {
     flexDirection: 'row',

@@ -24,6 +24,13 @@ export interface Company {
   phone: string | null;
   email: string | null;
   is_active: boolean;
+  is_laslog_verified?: boolean;
+  company_type?: 'carrier' | 'broker' | 'mixed';
+  verification_status?: 'unverified' | 'self_attested' | 'admin_verified' | 'flagged';
+  dot_mc_validation_status?: 'not_submitted' | 'valid' | 'invalid_format';
+  is_fraud_flagged?: boolean;
+  average_rating?: number | null;
+  rating_count?: number;
   subscription_tier: SubscriptionTier | null;
   billing_interval: BillingInterval | null;
   created_at: string;

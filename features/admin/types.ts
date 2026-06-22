@@ -2,7 +2,7 @@ import type { SupportTicketStatus } from '../chat/types';
 import type { CbleMaterial, CbleMaterialType, CbleCategoryId } from '../cble-prep/types';
 import type { Profile, Company } from '../../packages/shared/src/auth/types';
 
-export type AdminTabId = 'tickets' | 'cble' | 'users';
+export type AdminTabId = 'tickets' | 'cble' | 'users' | 'verification';
 
 export interface SupportTicketWithCompany {
   id: string;

@@ -1,14 +1,14 @@
 import type { SupportTicketStatus } from '../chat/types';
 import type { AdminTabId } from './types';
 
-/** Shared admin dashboard brand tokens (light theme + electric blue) */
+/** Shared admin dashboard brand tokens (light theme + electric blue per lasbrandSKILL.md) */
 export const ADMIN_BRAND = {
-  accent: '#1E40AF',
-  accentBright: '#00bfff',
+  accent: '#00BFFF', // Electric Blue
+  accentBright: '#00BFFF',
   background: '#F8FAFC',
   surface: '#FFFFFF',
   border: '#E2E8F0',
-  textPrimary: '#0F172A',
+  textPrimary: '#0F172A', // Deep Metallic Navy
   textSecondary: '#64748B',
   success: '#047857',
   warning: '#B45309',
@@ -19,6 +19,7 @@ export const ADMIN_TABS: { id: AdminTabId; label: string }[] = [
   { id: 'tickets', label: 'Support & Refunds' },
   { id: 'cble', label: 'CBLE Content' },
   { id: 'users', label: 'Users' },
+  { id: 'verification', label: 'Verification' },
 ];
 
 export const TICKET_STATUS_LABELS: Record<SupportTicketStatus, string> = {

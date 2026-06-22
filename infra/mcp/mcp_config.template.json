@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "github-mcp-server": {
+      "command": "__DOCKER_EXE__",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--pull=missing",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {},
+      "disabledTools": ["merge_pull_request"]
+    },
+    "supabase": {
+      "serverUrl": "https://mcp.supabase.com/mcp?project_ref=__SUPABASE_PROJECT_REF__",
+      "headers": {
+        "Authorization": "Bearer __SUPABASE_ACCESS_TOKEN__"
+      }
+    },
+    "grok-build-delegate": {
+      "command": "__PYTHON_EXE__",
+      "args": ["__GROK_DELEGATE_SCRIPT__"],
+      "env": {
+        "PATH": "__ENHANCED_PATH__"
+      },
+      "disabled": false
+    }
+  }
+}

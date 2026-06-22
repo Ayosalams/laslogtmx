@@ -18,6 +18,8 @@ import { useRefundWorkflow } from '../hooks/useRefundWorkflow';
 import { ChatMessage } from '../types';
 import { detectRefundIntent } from '../utils/detectRefundIntent';
 import { useAuth } from '../../../packages/shared/src/auth/AuthContext';
+import { useChatCounterparty } from '../../verification/hooks/useChatCounterparty';
+import { CompanyProfileStrip } from '../../verification/components/CompanyProfileStrip';
 
 export const ChatRoomScreen = ({ route, navigation }: any) => {
   const { channelId, channelName } = route?.params || {};
@@ -32,6 +34,7 @@ export const ChatRoomScreen = ({ route, navigation }: any) => {
   const flatListRef = useRef<FlatList>(null);
   const { submitting, uploadingScreenshot, submitRefundRequest } = useRefundWorkflow();
   const { verifyHighRiskAction } = useAuth();
+  const { counterparty } = useChatCounterparty(channelId);
 
   // Load current user once
   useEffect(() => {
@@ -283,6 +286,12 @@ export const ChatRoomScreen = ({ route, navigation }: any) => {
         <View style={{ width: 32 }} />
       </View>
 
+      {counterparty && (
+        <View style={styles.counterpartyStrip}>
+          <CompanyProfileStrip profile={counterparty} label="Trading with" />
+        </View>
+      )}
+
       <FlatList
         ref={flatListRef}
         data={messages}
@@ -362,6 +371,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#E2E8F0',
+  },
+  counterpartyStrip: {
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   backBtn: {
     padding: 8,

@@ -1,7 +1,7 @@
 {
     "feature": "Receipt OCR + Mandatory Correction",
-    "status": "Completed",
-    "last_updated": "2026-06-15",
+    "status": "Polished",
+    "last_updated": "2026-06-21",
     "completed": [
         "ReceiptCaptureScreen with expo-camera live capture + expo-image-picker gallery upload",
         "useReceiptOcr hook with Google ML Kit text recognition + heuristic fallback parser",
@@ -12,31 +12,39 @@
         "Supabase migration: expenses table + receipts storage bucket + RLS policies",
         "Navigation wired: Expenses tab, ReceiptCapture/ReceiptCorrection stack screens",
         "Light theme UI with electric blue (#00bfff) accents and military time in headers",
-        "Mobile app.config camera/photo permissions + ML Kit dependency"
+        "Mobile app.config camera/photo permissions + ML Kit dependency",
+        "OCR polish: text normalization, total-vs-tax amount ranking, amount candidate chips",
+        "Category suggestions with scored keyword matching and detention category",
+        "Inline amount/date/time validation with category-aware warnings",
+        "Detention Timer feature with load attribution and expense scan integration",
+        "Manual expense entry flow without receipt image",
+        "useMilitaryClock — military time enforced on all receipt/expense timestamps",
+        "Migration 20240622000000_expenses_detention.sql — detention category + load_id/load_number",
+        "Web parity: /receipts capture + /receipts/correct with useReceiptOcrWeb (Tesseract.js)"
     ],
     "next_steps": [
-        "Apply supabase/migrations/20240620000000_expenses.sql via supabase db push",
+        "Apply supabase/migrations/20240620000000_expenses.sql and 20240622000000_expenses_detention.sql via supabase db push",
         "Run expo prebuild for native ML Kit on device builds (Expo Go uses fallback OCR)",
-        "Add manual expense entry without receipt scan",
         "QuickBooks expense sync via Make.com integration",
-        "Expense filters, export, and per-load attribution"
+        "Expense filters, export, and per-load attribution dashboard"
     ],
     "key_decisions": [
         "ML Kit primary with demo fallback when native module unavailable (Expo Go)",
         "Mandatory user_confirmed gate — save blocked until checkbox + field validation pass",
-        "Military time stored as HH:MM text; display respects SettingsContext toggle",
+        "Military time stored as HH:MM text; receipt/expense screens always display 24h via useMilitaryClock",
         "Receipt images uploaded to private receipts/{company_id}/ path in Supabase Storage",
-        "Expense categories aligned with carrier workflows: fuel, maintenance, tolls, food, lodging, supplies, other"
+        "Expense categories aligned with carrier workflows including detention accessorials",
+        "Detention timer persisted locally via AsyncStorage; links expenses via load_number/load_id"
     ],
     "blockers": [
-        "Run expenses migration before live Supabase saves will work"
+        "Run expenses + detention migrations before live Supabase saves with load attribution"
     ],
     "build_status": {
         "mobile_typecheck": "passed",
         "root_typecheck": "passed",
+        "backup_branch": "backup-before-receipt-ocr-polish",
         "mobile_expo_start": "not_run",
-        "turbo_build_mobile": "skipped — turbo packageManager config missing (pre-existing)",
-        "notes": "npm install --legacy-peer-deps succeeded; expo-camera, expo-image-picker, @react-native-ml-kit/text-recognition added"
+        "notes": "Polish applied 2026-06-21; 14 files touched across receipt-ocr, detention-timer, expenses"
     },
     "market_opportunity": "High — core TMS differentiator for owner-operators and small fleets tracking road expenses"
 }

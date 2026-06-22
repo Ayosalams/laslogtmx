@@ -1,7 +1,7 @@
 {
     "feature": "MOTUS Helper",
     "status": "Completed",
-    "last_updated": "2026-06-14",
+    "last_updated": "2026-06-21",
     "completed": [
         "Guided multi-step DOT number linking/claiming flow (DotClaimingFlow)",
         "Common error troubleshooting page with expandable solutions",
@@ -11,7 +11,8 @@
         "Self-contained hooks with realistic demo data",
         "Clean professional mobile-first UI using shared military time formatting",
         "Integrated demo navigation in mobile App.tsx alongside Chat & Settings",
-        "Types and structure placed under features/motus-helper/"
+        "Types and structure placed under features/motus-helper/",
+        "Web parity: /motus hub + status, dot-claim, troubleshooting, documents routes"
     ],
     "next_steps": [
         "Add real Supabase Storage uploads + motus_submissions table + RLS",

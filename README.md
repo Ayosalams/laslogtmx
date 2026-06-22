@@ -8,11 +8,39 @@
 - **Backend**: Supabase
 - **Monorepo**: Turborepo
 - **Domains**: laslogtmx.com (marketing), app.laslogtmx.com (app), dev.laslogtmx.com (staging)
+- **Legacy redirects**: laslogs.cc → laslogtmx.com (301, configured in Cloudflare + `_redirects`)
 
 ## Quick Start
-1. Copy `.env.example` → `.env.local`
+1. Copy `.env.example` → `.env.local` and fill in Supabase keys manually
 2. `npm install`
-3. `npm run dev` (web) or `npm run mobile`
+3. `npm run dev:web` (web) or `npm run dev:mobile` (mobile)
+
+## Cloudflare Deployment
+
+Security and routing are defined in `infra/cloudflare/rules-manifest.json` and applied at the zone level:
+
+| Setting | Status | Location |
+|---------|--------|----------|
+| HSTS (preload) | Enabled | `_headers` + zone SSL/TLS |
+| WAF (managed + OWASP) | Deployed | Cloudflare dashboard |
+| Page Shield | Enabled | Cloudflare dashboard |
+| Redirect Rules | Deployed | laslogs.cc → laslogtmx.com |
+| Cache Rules | Deployed | API/auth bypass, static assets cached |
+| Transform Rules | Deployed | Security headers + IP passthrough |
+| Rate Limiting | Deployed | signup-risk, push, auth endpoints |
+
+Pages config: `apps/web/wrangler.toml`
+
+### Staging (dev.laslogtmx.com)
+
+1. Create a `dev` branch in the repo
+2. In Cloudflare Pages → **dev** branch → add custom domain `dev.laslogtmx.com`
+3. Set branch env vars:
+   - `NEXT_PUBLIC_APP_URL=https://dev.laslogtmx.com`
+   - `NEXT_PUBLIC_WEB_APP_URL=https://dev.laslogtmx.com`
+4. Deploy; staging uses the same Supabase project (add `dev.laslogtmx.com` to Supabase Auth redirect URLs)
+
+Checkpoint: [`.agents/checkpoints/cloudflare-setup.json`](.agents/checkpoints/cloudflare-setup.json)
 
 ## Key Features
 - Military Time default

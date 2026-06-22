@@ -12,8 +12,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(payload.title || 'laslogTMX', {
       body: payload.body || '',
-      icon: '/icon-192.png',
-      badge: '/icon-192.png',
+      icon: '/logos/TMX_Icon_Logo_actual.png',
+      badge: '/logos/TMX_Icon_Logo_actual.png',
       data: payload.data || {},
     })
   );

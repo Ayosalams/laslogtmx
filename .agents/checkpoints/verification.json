@@ -1,0 +1,48 @@
+{
+    "feature": "Carrier/Broker Verification + Rating System",
+    "status": "Completed",
+    "last_updated": "2026-06-21",
+    "completed": [
+        "features/verification/ module (types, constants, hooks, utils, components)",
+        "Supabase migration 20240624000000_company_verification.sql",
+        "Company verification_status: unverified, self_attested, admin_verified, flagged",
+        "Self-attest DOT/MC RPC (self_attest_dot_mc) with format + duplicate DOT fraud flag",
+        "Admin verify/unverify RPC (admin_verify_company)",
+        "Admin flag company RPC (admin_flag_company) → fraud_flags company_id integration",
+        "Post-load rating system (company_ratings + submit_company_rating RPC)",
+        "close_load_board_load RPC for broker to mark load complete before rating",
+        "get_company_public_profile RPC for cross-tenant trust display",
+        "admin_list_companies_for_verification RPC for admin dashboard",
+        "VerifiedBadge + CompanyRatingStars components (mobile + web)",
+        "CompanyProfileCard + CompanyProfileStrip on Load Board",
+        "RateCompanyForm after load completion on Load Detail",
+        "Chat counterparty verification strip (useChatCounterparty)",
+        "Admin Verification tab (mobile AdminDashboard + web /admin)",
+        "Web /settings/verification self-attest page",
+        "Extended Company type in packages/shared auth types"
+    ],
+    "next_steps": [
+        "Apply migration 20240624000000_company_verification.sql to Supabase",
+        "Optional: FMCSA SAFER API integration for live DOT/MC lookup (Phase 2)",
+        "Add Make.com alert on company_flag:* fraud_flags INSERT",
+        "Mobile settings screen for SelfAttestForm (parity with web)",
+        "Review fraud_flags weekly for company_flag:* and company_fraud:* reasons"
+    ],
+    "key_decisions": [
+        "Lean DOT/MC validation — format + duplicate check only (no paid FMCSA API)",
+        "Self-attested sets is_laslog_verified=true; admin_verified is elevated tier",
+        "Fraud flags reuse existing fraud_flags table with company_id column",
+        "One rating per load per rater company; requires contract + closed/awarded status",
+        "Cross-tenant company profile read gated to verified load board participants",
+        "Admin company list via security definer RPC (RLS blocks cross-tenant select)"
+    ],
+    "blockers": [
+        "Migration must be applied before verification RPCs work in production"
+    ],
+    "build_status": {
+        "web": "PASS — npx tsc --noEmit in apps/web (2026-06-21)",
+        "mobile": "PASS — npx tsc --noEmit in apps/mobile (2026-06-21)",
+        "typescript_verification": "PASS — zero errors in features/verification/",
+        "notes": "Full static export still requires NEXT_PUBLIC_SUPABASE_* in .env.local (pre-existing)."
+    }
+}

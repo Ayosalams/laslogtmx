@@ -18,6 +18,8 @@ import { ExpenseListScreen } from '../../../../features/expenses/screens/Expense
 import { registerForExpoPush } from '../lib/mobilePush';
 import { AdminDashboardScreen } from '../../../../features/admin/screens/AdminDashboardScreen';
 import { useAdminAccess } from '../../../../features/admin/hooks/useAdminAccess';
+import { LoadBoardScreen } from '../../../../features/load-board/screens/LoadBoardScreen';
+import { useLoadBoardAccess } from '../../../../features/load-board/hooks/useLoadBoardAccess';
 
 // Simple Settings screen extracted from previous demo
 function SettingsScreen({ navigation }: { navigation?: { navigate: (name: string) => void } }) {
@@ -96,7 +98,7 @@ function SettingsScreen({ navigation }: { navigation?: { navigate: (name: string
           <Switch
             value={isMilitaryTime}
             onValueChange={toggleMilitaryTime}
-            trackColor={{ false: '#ccc', true: '#1E40AF' }}
+            trackColor={{ false: '#ccc', true: '#00BFFF' }}
             thumbColor="#fff"
           />
         </View>
@@ -120,12 +122,13 @@ const Tab = createBottomTabNavigator();
 
 export default function MainTabNavigator() {
   const { isAdmin } = useAdminAccess();
+  const loadBoardAccess = useLoadBoardAccess();
 
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false, // We handle headers inside screens or via stack
-        tabBarActiveTintColor: '#1E40AF', // Electric blue accent
+        tabBarActiveTintColor: '#00BFFF', // Electric Blue per lasbrandSKILL.md
         tabBarInactiveTintColor: '#64748B',
         tabBarStyle: {
           backgroundColor: '#fff',
@@ -150,6 +153,16 @@ export default function MainTabNavigator() {
           // tabBarIcon: ({ color, size }) => <Ionicons name="chatbubble-outline" size={size} color={color} />,
         }}
       />
+      <Tab.Screen
+        name="Loads"
+        options={{
+          tabBarLabel: 'Loads',
+          tabBarButton: loadBoardAccess.canAccess ? undefined : () => null,
+          tabBarItemStyle: loadBoardAccess.canAccess ? undefined : { display: 'none', width: 0, height: 0 },
+        }}
+      >
+        {(props) => <LoadBoardScreen navigation={props.navigation} />}
+      </Tab.Screen>
       <Tab.Screen
         name="Expenses"
         options={{
@@ -329,6 +342,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
-  linkLabel: { fontSize: 15, fontWeight: '600', color: '#1E40AF' },
+  linkLabel: { fontSize: 15, fontWeight: '600', color: '#00BFFF' },
   linkChevron: { fontSize: 20, color: '#94A3B8' },
 });

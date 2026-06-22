@@ -5,15 +5,15 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL ||
   process.env.EXPO_PUBLIC_SUPABASE_URL ||
-  'https://gnwufbvrxcvnrfvanmrg.supabase.co';
+  '';
 
 const supabaseAnonKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
-  'sb_publishable_xNWXO0aA32a821rR6XlMTA_zRVrm-Uf';
+  '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase env vars not set. Using fallback from .env.example');
+  console.warn('Supabase env vars not set. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (or EXPO_*) in .env.local. Do NOT hardcode values.');
 }
 
 // Cross-platform auth storage setup

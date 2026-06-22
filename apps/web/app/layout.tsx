@@ -9,8 +9,8 @@ import { PushNotificationBridge } from '../../../packages/shared/src/notificatio
 import { registerWebPush } from '../lib/webPush';
 import { showLocalNotification } from '../lib/showLocalNotification';
 import { Header } from '../components/Header';
+import { AppNav } from '../components/AppNav';
 import { AdminNavLink } from '../components/AdminNavLink';
-import Link from 'next/link';
 
 export default function RootLayout({
   children,
@@ -39,14 +39,10 @@ export default function RootLayout({
               />
               <PushNotificationBridge onLocalNotification={showLocalNotification} />
             <Header />
-            <nav className="max-w-7xl mx-auto px-4 pt-2 flex gap-4 text-sm">
-              <Link href="/pricing" className="text-gray-600 hover:text-gray-900 hover:underline">Pricing</Link>
-              <Link href="/auth/login" className="text-indigo-600 hover:underline">Login</Link>
-              <Link href="/auth/signup" className="text-indigo-600 hover:underline">Signup</Link>
-              <Link href="/auth/company" className="text-indigo-600 hover:underline">Company Setup</Link>
-              <Link href="/settings" className="text-gray-600 hover:text-gray-900 hover:underline">Settings</Link>
+            <AppNav />
+            <div className="max-w-7xl mx-auto px-4 flex gap-4 text-xs text-gray-500 pb-1">
               <AdminNavLink />
-            </nav>
+            </div>
             <main className="p-4 max-w-7xl mx-auto">{children}</main>
             </AuthProvider>
           </BiometricProvider>

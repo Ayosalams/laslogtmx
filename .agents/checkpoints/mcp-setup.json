@@ -1,0 +1,58 @@
+{
+  "checkpoint": "mcp-server-connections",
+  "version": "2026-06-22",
+  "status": "complete-pending-supabase-pat",
+  "backup_branch": "backup-before-mcp-fix",
+  "diagnosis": {
+    "docker": "Docker Desktop running; GitHub MCP failed because docker pull progress corrupted MCP JSON stdout stream",
+    "supabase": "OAuth token in mcp_oauth_tokens.json expired; npx installation output corrupted MCP JSON stdout stream",
+    "github": "Hardcoded PAT; Docker -e passthrough not used; docker pull progress corrupted JSON stdout stream",
+    "grok_build": "uv run resolution logs corrupted MCP JSON stdout stream, causing IDE refresh to spin"
+  },
+  "fixes_applied": {
+    "infra": [
+      "infra/mcp/apply-mcp-config.ps1",
+      "infra/mcp/verify-mcp.ps1",
+      "infra/mcp/mcp_config.template.json",
+      "infra/mcp/bridges/github-bridge.ps1",
+      "infra/mcp/bridges/supabase-bridge.ps1",
+      "infra/mcp/bridges/grok-build-bridge.ps1"
+    ],
+    "project_config": [
+      ".grok/config.toml",
+      ".mcp.json",
+      ".env.example (MCP section)"
+    ],
+    "user_config_sanitized": [
+      "~/.gemini/antigravity-ide/mcp_config.json",
+      "~/.gemini/config/mcp_config.json",
+      "~/.gemini/antigravity/mcp_config.json",
+      "~/.grok/config.toml"
+    ],
+    "secrets_migrated_to_user_env": [
+      "GITHUB_PERSONAL_ACCESS_TOKEN",
+      "SUPABASE_PROJECT_REF",
+      "XAI_API_KEY"
+    ]
+  },
+  "verification": {
+    "docker": "pass",
+    "github_mcp": "pass (grok mcp doctor github - 43 tools)",
+    "grok_build_mcp": "pass (grok mcp doctor grok-build - delegate_task tool)",
+    "supabase_mcp": "pending - requires SUPABASE_ACCESS_TOKEN user env var (Supabase PAT)",
+    "antigravity_configs": "pass - sanitized, grok-build-delegate added, bridge scripts with enhanced PATH"
+  },
+  "manual_steps_remaining": [
+    "Generate Supabase PAT at https://supabase.com/dashboard/account/tokens",
+    "Set Windows User env var SUPABASE_ACCESS_TOKEN to the PAT value",
+    "Restart Antigravity IDE completely (close all windows) to reload user env vars",
+    "Run: .\\infra\\mcp\\verify-mcp.ps1 — all checks should pass",
+    "Optional: rotate GitHub PAT since it was previously stored in plaintext config"
+  ],
+  "maintenance": {
+    "reapply_after_clone": ".\\infra\\mcp\\apply-mcp-config.ps1",
+    "verify": ".\\infra\\mcp\\verify-mcp.ps1",
+    "docker": "Enable Docker Desktop 'Start when Windows starts'",
+    "supabase": "Use PAT (not OAuth) for persistent MCP auth; re-run apply script after token rotation"
+  }
+}

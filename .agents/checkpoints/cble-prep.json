@@ -14,7 +14,8 @@
         "Pricing page: Pro Broker plan, CBLE spotlight, comparison table column",
         "Settings/Profile: subscription tier and CBLE access level (web + mobile)",
         "FEATURES.cblePrep constant added",
-        "CBLE tab integrated in mobile MainTabNavigator"
+        "CBLE tab integrated in mobile MainTabNavigator",
+        "Web parity: /cble route with CbleLibraryWeb (tier-gated, disclaimers)"
     ],
     "next_steps": [
         "Upload real CBLE assets to Supabase Storage and wire assetPath URLs",

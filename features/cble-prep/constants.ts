@@ -49,7 +49,8 @@ export const CBLE_CATEGORIES: CbleCategory[] = [
 
 /**
  * Placeholder library content.
- * TODO: Replace assetPath values with real Supabase Storage URLs (podcasts, videos, PDFs).
+ * TODO: Replace assetPath values with real Supabase Storage URLs or CDN paths.
+ * Assets now organized under features/cble-prep/assets/{audio,videos,pdfs,...}
  * TODO: Wire progress tracking via cble_material_progress table when backend is ready.
  */
 export const CBLE_PLACEHOLDER_MATERIALS: CbleMaterial[] = [
@@ -61,7 +62,7 @@ export const CBLE_PLACEHOLDER_MATERIALS: CbleMaterial[] = [
     type: 'podcast',
     durationMinutes: 24,
     updatedAt: '2026-06-10T14:30:00Z',
-    assetPath: 'cble/podcasts/broker-authority-overview.mp3',
+    assetPath: 'features/cble-prep/assets/audio/broker-authority-overview.mp3',
     requiresFullAccess: false,
   },
   {
@@ -72,7 +73,7 @@ export const CBLE_PLACEHOLDER_MATERIALS: CbleMaterial[] = [
     type: 'video',
     durationMinutes: 18,
     updatedAt: '2026-06-11T09:15:00Z',
-    assetPath: 'cble/videos/ace-entry-walkthrough.mp4',
+    assetPath: 'features/cble-prep/assets/videos/ace-entry-walkthrough.mp4',
     requiresFullAccess: true,
   },
   {
@@ -82,7 +83,7 @@ export const CBLE_PLACEHOLDER_MATERIALS: CbleMaterial[] = [
     description: 'PDF study sheet — GRI 1–6 with worked examples',
     type: 'pdf',
     updatedAt: '2026-06-12T16:45:00Z',
-    assetPath: 'cble/pdfs/hts-gri-study-sheet.pdf',
+    assetPath: 'features/cble-prep/assets/pdfs/hts-gri-study-sheet.pdf',
     requiresFullAccess: true,
   },
   {
@@ -93,7 +94,7 @@ export const CBLE_PLACEHOLDER_MATERIALS: CbleMaterial[] = [
     type: 'podcast',
     durationMinutes: 32,
     updatedAt: '2026-06-13T11:00:00Z',
-    assetPath: 'cble/podcasts/transaction-value-deep-dive.mp3',
+    assetPath: 'features/cble-prep/assets/audio/transaction-value-deep-dive.mp3',
     requiresFullAccess: true,
   },
   {
@@ -104,7 +105,7 @@ export const CBLE_PLACEHOLDER_MATERIALS: CbleMaterial[] = [
     type: 'video',
     durationMinutes: 12,
     updatedAt: '2026-06-14T08:20:00Z',
-    assetPath: 'cble/videos/las-pronunciation-guide.mp4',
+    assetPath: 'features/cble-prep/assets/videos/las-pronunciation-guide.mp4',
     requiresFullAccess: false,
   },
   {
@@ -114,7 +115,7 @@ export const CBLE_PLACEHOLDER_MATERIALS: CbleMaterial[] = [
     description: 'Condensed regulatory reference for internal review sessions',
     type: 'pdf',
     updatedAt: '2026-06-14T17:30:00Z',
-    assetPath: 'cble/pdfs/19-cfr-quick-reference.pdf',
+    assetPath: 'features/cble-prep/assets/pdfs/19-cfr-quick-reference.pdf',
     requiresFullAccess: true,
   },
 ];

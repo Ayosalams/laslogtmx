@@ -1,0 +1,8 @@
+# Legacy laslogs.cc → laslogtmx.com (301 permanent)
+https://laslogs.cc/* https://laslogtmx.com/:splat 301
+https://www.laslogs.cc/* https://laslogtmx.com/:splat 301
+https://app.laslogs.cc/* https://app.laslogtmx.com/:splat 301
+https://dev.laslogs.cc/* https://dev.laslogtmx.com/:splat 301
+
+# Apex → marketing (when served from app subdomain project)
+https://laslogtmx.com/auth/* https://app.laslogtmx.com/auth/:splat 302

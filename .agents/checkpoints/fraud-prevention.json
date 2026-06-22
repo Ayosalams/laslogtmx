@@ -9,7 +9,8 @@
         "Shared signUpWithFraudCheck helper (web + mobile)",
         "Web signup IP capture via /api/auth/signup-risk",
         "Make.com scenario blueprint at integrations/make/signup-fraud-velocity.json",
-        "README fraud prevention section"
+        "README fraud prevention section",
+        "Company-level fraud flags via features/verification (company_id on fraud_flags, admin_flag_company RPC)"
     ],
     "rules": {
         "velocity": {

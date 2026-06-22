@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import type { ReceiptOcrResult } from '../types';
-import { parseReceiptText } from '../utils/parseReceiptText';
+import { normalizeOcrText, parseReceiptText } from '../utils/parseReceiptText';
 
 type OcrEngine = 'mlkit' | 'fallback';
 
@@ -19,7 +19,10 @@ async function recognizeWithMlKit(imageUri: string): Promise<string> {
       return result.text;
     }
     return blocks
-      .map((block: { text?: string }) => block.text ?? '')
+      .map((block: { text?: string; lines?: { text?: string }[] }) => {
+        if (block.text) return block.text;
+        return (block.lines ?? []).map((line) => line.text ?? '').join('\n');
+      })
       .filter(Boolean)
       .join('\n');
   } catch {
@@ -30,7 +33,7 @@ async function recognizeWithMlKit(imageUri: string): Promise<string> {
 /**
  * On-device receipt OCR.
  * Primary: Google ML Kit text recognition.
- * Fallback: heuristic parser on minimal placeholder text when native OCR is unavailable (Expo Go / web).
+ * Fallback: heuristic parser when native OCR is unavailable (Expo Go / web).
  */
 export function useReceiptOcr() {
   const [state, setState] = useState<UseReceiptOcrState>({
@@ -61,9 +64,16 @@ export function useReceiptOcr() {
         ].join('\n');
       }
 
+      rawText = normalizeOcrText(rawText);
+
       if (!rawText.trim()) {
         engine = 'fallback';
-        rawText = 'Receipt image captured. Please enter details manually.';
+        setState({
+          isProcessing: false,
+          error: 'No text detected — enter details manually on the review screen.',
+          lastEngine: engine,
+        });
+        return parseReceiptText('Receipt image captured. Please enter details manually.');
       }
 
       const parsed = parseReceiptText(rawText);

@@ -13,6 +13,8 @@ export interface Expense {
   notes: string | null;
   ocr_raw_text: string | null;
   user_confirmed: boolean;
+  load_id: string | null;
+  load_number: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -27,4 +29,6 @@ export interface CreateExpenseInput {
   notes?: string;
   ocr_raw_text?: string;
   user_confirmed: boolean;
+  load_id?: string;
+  load_number?: string;
 }

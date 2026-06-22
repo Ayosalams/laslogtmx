@@ -37,7 +37,7 @@ export const CbleLibraryScreen: React.FC<Props> = () => {
     Alert.alert(
       material.title,
       `${material.type.toUpperCase()} — placeholder content.\n\n` +
-        `Future asset: ${material.assetPath ?? 'TBD'}\n\n` +
+        `Asset: ${material.assetPath ?? 'TBD'}\n\n` +
         'Internal training only. Not official CBLE material.',
       [{ text: 'OK' }]
     );
@@ -136,7 +136,7 @@ export const CbleLibraryScreen: React.FC<Props> = () => {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Placeholder content for development. Real podcasts, videos, and PDFs will be uploaded to Supabase Storage.
+            Placeholder content. Real assets under features/cble-prep/assets/ (audio, videos, pdfs, practice-tests, etc.). Upload to Supabase Storage for prod.
           </Text>
         </View>
       </ScrollView>
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   timePill: {
-    backgroundColor: '#E0E7FF',
+    backgroundColor: '#E0F2FE', // light electric blue tint
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
@@ -178,14 +178,14 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#1E40AF',
+    color: '#00BFFF', // Electric Blue per lasbrandSKILL.md
   },
   gateCard: {
     backgroundColor: '#fff',
     borderRadius: 14,
     padding: 16,
-    borderWidth: 1,
-    borderColor: '#FECACA',
+    borderWidth: 2,
+    borderColor: '#00BFFF', // Electric Blue border for restricted per cble-prepSKILL
     marginBottom: 16,
   },
   gateTitle: {
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   },
   gateMeta: {
     fontSize: 12,
-    color: '#1E40AF',
+    color: '#00BFFF', // Electric Blue accent per lasbrand
     marginTop: 10,
     fontWeight: '500',
   },
@@ -250,8 +250,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   categoryChipActive: {
-    backgroundColor: '#1E40AF',
-    borderColor: '#1E40AF',
+    backgroundColor: '#00BFFF', // Electric Blue accent
+    borderColor: '#00BFFF',
   },
   categoryChipText: {
     fontSize: 12,

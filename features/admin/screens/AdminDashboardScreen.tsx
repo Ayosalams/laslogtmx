@@ -6,6 +6,7 @@ import { AdminTabBar } from '../components/AdminTabBar';
 import { SupportTicketsPanel } from '../components/SupportTicketsPanel';
 import { CbleContentPanel } from '../components/CbleContentPanel';
 import { UserManagementPanel } from '../components/UserManagementPanel';
+import { VerificationAdminPanel } from '../../verification/components/VerificationAdminPanel';
 import { ADMIN_BRAND } from '../constants';
 import type { AdminTabId } from '../types';
 
@@ -21,6 +22,8 @@ function AdminDashboardContent() {
         return <CbleContentPanel />;
       case 'users':
         return <UserManagementPanel />;
+      case 'verification':
+        return <VerificationAdminPanel />;
       default:
         return null;
     }

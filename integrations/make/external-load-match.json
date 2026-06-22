@@ -1,0 +1,37 @@
+{
+  "name": "laslogTMX External Load Match (Placeholder)",
+  "description": "Receives external load postings and dispatches smart match notifications to laslogTMX carriers via webhook API. Users must enable external_loads_enabled in notification settings.",
+  "trigger": {
+    "type": "webhook",
+    "source": "external_load_board",
+    "notes": "Connect your external load source (DAT, Truckstop, email parser, etc.) to this Make.com custom webhook."
+  },
+  "action": {
+    "type": "http",
+    "method": "POST",
+    "url": "{{WEB_APP_URL}}/api/load-match/external",
+    "headers": {
+      "Authorization": "Bearer {{LOAD_MATCH_WEBHOOK_SECRET}}",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "origin": "{{origin}}",
+      "destination": "{{destination}}",
+      "rate_dollars": "{{rate}}",
+      "equipment": "{{equipment}}",
+      "load_ref": "{{load_id}}",
+      "source": "make_com"
+    }
+  },
+  "downstream": {
+    "type": "reference",
+    "file": "notification-push.json",
+    "notes": "notifications INSERT trigger already dispatches push via /api/push/send when Supabase webhook is configured."
+  },
+  "env_vars": [
+    "WEB_APP_URL",
+    "LOAD_MATCH_WEBHOOK_SECRET",
+    "PUSH_WEBHOOK_SECRET"
+  ],
+  "notes": "Set LOAD_MATCH_WEBHOOK_SECRET in .env.local and GitHub Secrets. Never commit real secrets."
+}

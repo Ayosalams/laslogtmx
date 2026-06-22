@@ -8,11 +8,11 @@ import { usePushRegistration } from '../../../../../packages/shared/src/notifica
 import {
   NOTIFICATION_TYPE_LABELS,
   NOTIFICATION_TYPE_DESCRIPTIONS,
-  SUGGESTED_CITIES,
 } from '../../../../../packages/shared/src/notifications/constants';
 import { NotificationType } from '../../../../../packages/shared/src/notifications/types';
 import { registerWebPush } from '../../../lib/webPush';
 import { NotificationInboxWeb } from '../../../../../features/notifications/components/NotificationInboxWeb';
+import { LoadMatchSettingsWeb } from '../../../../../features/load-board/components/LoadMatchSettingsWeb';
 
 const NOTIFICATION_TYPES: NotificationType[] = [
   'load_match',
@@ -31,22 +31,9 @@ export default function NotificationSettingsPage() {
     error,
     saveSettings,
     toggleType,
-    addCity,
-    removeCity,
   } = useNotificationSettings(user?.id, profile?.company_id);
   const { registerPush } = usePushRegistration(user?.id, profile?.company_id);
-  const [cityInput, setCityInput] = useState('');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-
-  const handleAddCity = async () => {
-    const result = await addCity(cityInput);
-    if (!result.error) {
-      setCityInput('');
-      setStatusMessage(null);
-    } else {
-      setStatusMessage(result.error.message);
-    }
-  };
 
   const handleEnablePush = async () => {
     const sub = await registerWebPush();
@@ -164,56 +151,7 @@ export default function NotificationSettingsPage() {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold">Preferred Cities</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Load match alerts when origin or destination matches a city you add.
-        </p>
-
-        <div className="mt-4 flex gap-2">
-          <input
-            type="text"
-            value={cityInput}
-            onChange={(e) => setCityInput(e.target.value)}
-            placeholder="Add city (e.g. Chicago)"
-            className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00bfff]"
-          />
-          <button
-            type="button"
-            onClick={handleAddCity}
-            disabled={saving}
-            className="px-4 py-2 bg-[#00bfff] text-white font-semibold rounded-xl hover:opacity-90"
-          >
-            Add
-          </button>
-        </div>
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          {SUGGESTED_CITIES.map((city) => (
-            <button
-              key={city}
-              type="button"
-              onClick={() => addCity(city)}
-              className="text-xs px-3 py-1 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200"
-            >
-              + {city}
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          {settings.preferred_cities.map((city) => (
-            <button
-              key={city}
-              type="button"
-              onClick={() => removeCity(city)}
-              className="text-sm px-3 py-1 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100"
-            >
-              {city} ×
-            </button>
-          ))}
-        </div>
-      </div>
+      <LoadMatchSettingsWeb />
 
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <h2 className="text-lg font-semibold">Quiet Hours</h2>

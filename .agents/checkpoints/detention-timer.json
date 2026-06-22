@@ -1,0 +1,44 @@
+{
+    "feature": "Detention Timer — Full Integration",
+    "status": "Completed",
+    "last_updated": "2026-06-21",
+    "backup_branch": "backup-before-web-parity",
+    "completed": [
+        "features/detention-timer/ module: types, hooks, utils, banners (mobile + web)",
+        "Shared detentionUtils: military time, billable calc, claim draft builder",
+        "useDetentionTimer (AsyncStorage) + useDetentionTimerWeb (localStorage) parity",
+        "useAutoDetentionOnAssignment — auto-starts pickup timer on carrier load assignment",
+        "DetentionTimerBanner + DetentionTimerBannerWeb: elapsed/billable/free-left stats, live military clock",
+        "Generate claim → pre-filled detention expense (category, merchant, amount estimate, load link)",
+        "Load Detail integration: mobile LoadDetailScreen + web /load-board/[id]",
+        "Expense flow: ExpenseListScreen + ExpenseListWeb with claim CTA",
+        "Receipt correction: detention claim banner + load_id/load_number attribution",
+        "Supabase migration 20240622000000_expenses_detention.sql (detention category + load columns)"
+    ],
+    "integration_points": [
+        "Load assignment (accepted bid or contract) → auto-start detention timer",
+        "Active timer → Generate claim → ReceiptCorrection with detentionClaim flag",
+        "Expense save includes load_id + load_number for detention attribution",
+        "120 min default free time; $50/hr placeholder rate (user confirms on claim screen)"
+    ],
+    "next_steps": [
+        "Apply migration 20240622000000_expenses_detention.sql to Supabase if not yet applied",
+        "Configurable free-time and detention rate per company in settings",
+        "Pickup → delivery facility switch when load status changes",
+        "Server-side detention session sync (currently client-local only)"
+    ],
+    "key_decisions": [
+        "Timer state is client-local (AsyncStorage / localStorage) — no server persistence",
+        "Auto-start only when carrier is assigned and no timer exists for that load",
+        "Claim amount is estimated from billable minutes × $50/hr — mandatory user confirmation",
+        "Military time (HH:MM) used throughout per military-time checkpoint",
+        "Web + mobile share detentionUtils; platform-specific storage adapters only"
+    ],
+    "blockers": [],
+    "build_status": {
+        "web": "PASS — npx tsc --noEmit in apps/web (2026-06-21)",
+        "mobile": "PASS — npx tsc --noEmit in apps/mobile (2026-06-21)",
+        "typescript_detention_timer": "PASS — zero errors in features/detention-timer/",
+        "notes": "Full next build requires NEXT_PUBLIC_SUPABASE_* in .env.local (pre-existing)"
+    }
+}

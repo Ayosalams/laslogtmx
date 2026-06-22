@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--pull=missing",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ]
+    },
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=${SUPABASE_PROJECT_REF}",
+      "headers": {
+        "Authorization": "Bearer ${SUPABASE_ACCESS_TOKEN}"
+      }
+    },
+    "grok-build": {
+      "command": "uv",
+      "args": ["run", "${USERPROFILE}\\.grok-mcp\\grok_delegate_mcp.py"]
+    }
+  }
+}

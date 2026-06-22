@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
-import { useCurrentTime } from '../../../packages/shared/src/hooks/useCurrentTime';
+import { useMilitaryClock } from '../../../packages/shared/src/hooks/useMilitaryClock';
+import { useDetentionTimer } from '../../detention-timer/hooks/useDetentionTimer';
 import { useReceiptOcr } from '../hooks/useReceiptOcr';
 import { BRAND } from '../constants';
 
@@ -27,8 +28,17 @@ export const ReceiptCaptureScreen: React.FC<Props> = ({ navigation }) => {
   const [permission, requestPermission] = useCameraPermissions();
   const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [mode, setMode] = useState<'camera' | 'preview'>('camera');
-  const currentTime = useCurrentTime();
+  const currentTime = useMilitaryClock();
   const { processImage, isProcessing, error, lastEngine } = useReceiptOcr();
+  const { session: detentionSession } = useDetentionTimer();
+
+  const detentionContext = detentionSession
+    ? {
+        loadNumber: detentionSession.loadNumber,
+        loadId: detentionSession.loadId,
+        facility: detentionSession.facility,
+      }
+    : undefined;
 
   const handlePermission = useCallback(async () => {
     const result = await requestPermission();
@@ -44,19 +54,23 @@ export const ReceiptCaptureScreen: React.FC<Props> = ({ navigation }) => {
     async (uri: string) => {
       try {
         const ocrResult = await processImage(uri);
-        navigation?.navigate('ReceiptCorrection', { imageUri: uri, ocrResult });
+        navigation?.navigate('ReceiptCorrection', {
+          imageUri: uri,
+          ocrResult,
+          detentionContext,
+        });
       } catch {
         Alert.alert('Scan Failed', 'Could not read the receipt. Try again or pick a clearer photo.');
       }
     },
-    [navigation, processImage]
+    [navigation, processImage, detentionContext]
   );
 
   const takePhoto = useCallback(async () => {
     if (!cameraRef.current) return;
     try {
       const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.85,
+        quality: 0.9,
         skipProcessing: false,
       });
       if (photo?.uri) {
@@ -71,7 +85,7 @@ export const ReceiptCaptureScreen: React.FC<Props> = ({ navigation }) => {
   const pickFromLibrary = useCallback(async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.85,
+      quality: 0.9,
       allowsEditing: true,
     });
 
@@ -137,12 +151,21 @@ export const ReceiptCaptureScreen: React.FC<Props> = ({ navigation }) => {
         </View>
       </View>
 
+      {detentionSession ? (
+        <View style={styles.detentionStrip}>
+          <Text style={styles.detentionText}>
+            Detention active — Load {detentionSession.loadNumber} ({detentionSession.facility})
+          </Text>
+        </View>
+      ) : null}
+
       {mode === 'camera' ? (
         <View style={styles.cameraWrap}>
           <CameraView ref={cameraRef} style={styles.camera} facing="back">
             <View style={styles.overlay}>
               <View style={styles.frameGuide} />
               <Text style={styles.guideText}>Align receipt within the frame</Text>
+              <Text style={styles.guideSub}>Hold steady • avoid glare • capture the total line</Text>
             </View>
           </CameraView>
           <View style={styles.controls}>
@@ -213,6 +236,14 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   timeText: { fontSize: 12, fontWeight: '600', color: BRAND.accentDark, fontVariant: ['tabular-nums'] },
+  detentionStrip: {
+    backgroundColor: 'rgba(0,191,255,0.1)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,191,255,0.2)',
+  },
+  detentionText: { fontSize: 12, fontWeight: '600', color: BRAND.accentDark },
   title: { fontSize: 22, fontWeight: '700', color: BRAND.text, marginBottom: 8, textAlign: 'center' },
   subtitle: { fontSize: 14, color: BRAND.textMuted, textAlign: 'center', marginBottom: 24, lineHeight: 20 },
   cameraWrap: { flex: 1 },
@@ -227,6 +258,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
   guideText: { color: '#fff', marginTop: 16, fontSize: 14, fontWeight: '500' },
+  guideSub: { color: 'rgba(255,255,255,0.8)', marginTop: 6, fontSize: 12 },
   controls: {
     flexDirection: 'row',
     alignItems: 'center',

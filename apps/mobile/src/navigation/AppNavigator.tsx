@@ -20,6 +20,7 @@ import { DocumentTrackerScreen } from '../../../../features/motus-helper/screens
 
 import { ReceiptCaptureScreen } from '../../../../features/receipt-ocr/screens/ReceiptCaptureScreen';
 import { ReceiptCorrectionScreen } from '../../../../features/receipt-ocr/screens/ReceiptCorrectionScreen';
+import { LoadDetailScreen } from '../../../../features/load-board/screens/LoadDetailScreen';
 
 // Tab Navigator
 import MainTabNavigator from './MainTabNavigator';
@@ -45,7 +46,8 @@ export type RootStackParamList = {
   DocumentTracker: undefined;
   Settings: undefined;
   ReceiptCapture: undefined;
-  ReceiptCorrection: { imageUri: string; ocrResult: import('../../../../features/receipt-ocr/types').ReceiptOcrResult };
+  ReceiptCorrection: import('../../../../features/receipt-ocr/types').ReceiptCaptureParams;
+  LoadDetail: { loadId: string };
 };
 
 const Stack = createNativeStackNavigator<any>(); // Use any for flexibility with custom prop interfaces in feature screens
@@ -96,6 +98,7 @@ function AppNavigator() {
             <Stack.Screen name="DocumentTracker" component={DocumentTrackerScreen} />
             <Stack.Screen name="ReceiptCapture" component={ReceiptCaptureScreen} />
             <Stack.Screen name="ReceiptCorrection" component={ReceiptCorrectionScreen} />
+            <Stack.Screen name="LoadDetail" component={LoadDetailScreen} />
           </>
         )}
       </Stack.Navigator>

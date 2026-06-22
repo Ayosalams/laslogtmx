@@ -26,7 +26,7 @@ export function useCbleContentAdmin() {
         type: input.type,
         durationMinutes: input.durationMinutes,
         updatedAt: new Date().toISOString(),
-        assetPath: input.assetPath?.trim() || `cble/uploads/${createMaterialId()}`,
+        assetPath: input.assetPath?.trim() || `features/cble-prep/assets/uploads/${createMaterialId()}`,
         requiresFullAccess: input.requiresFullAccess,
         isDraft: true,
       };

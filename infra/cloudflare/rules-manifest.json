@@ -1,0 +1,141 @@
+{
+  "version": "2026-06-21",
+  "zone": "laslogtmx.com",
+  "status": "deployed",
+  "domains": {
+    "marketing": "laslogtmx.com",
+    "app": "app.laslogtmx.com",
+    "staging": "dev.laslogtmx.com",
+    "legacy": ["laslogs.cc", "www.laslogs.cc", "app.laslogs.cc", "dev.laslogs.cc"]
+  },
+  "hsts": {
+    "enabled": true,
+    "max_age": 31536000,
+    "include_subdomains": true,
+    "preload": true,
+    "note": "Also enforced via apps/web/public/_headers"
+  },
+  "waf": {
+    "enabled": true,
+    "managed_rulesets": [
+      "cloudflare-managed",
+      "cloudflare-owasp"
+    ],
+    "custom_rules": [
+      {
+        "name": "Block known bad bots",
+        "expression": "(cf.client.bot) and not (cf.verified_bot_category in {\"Search Engine Crawler\" \"Monitoring & Analytics\"})",
+        "action": "block"
+      },
+      {
+        "name": "Challenge suspicious signup traffic",
+        "expression": "(http.request.uri.path eq \"/api/auth/signup-risk\") and (cf.threat_score gt 10)",
+        "action": "managed_challenge"
+      }
+    ]
+  },
+  "page_shield": {
+    "enabled": true,
+    "malicious_script_detection": true,
+    "data_exfiltration_detection": true,
+    "cookie_monitoring": true
+  },
+  "redirect_rules": [
+    {
+      "name": "Legacy apex laslogs.cc",
+      "expression": "(http.host eq \"laslogs.cc\" or http.host eq \"www.laslogs.cc\")",
+      "action": "redirect",
+      "target": "https://laslogtmx.com${uri.path}",
+      "status_code": 301
+    },
+    {
+      "name": "Legacy app laslogs.cc",
+      "expression": "(http.host eq \"app.laslogs.cc\")",
+      "action": "redirect",
+      "target": "https://app.laslogtmx.com${uri.path}",
+      "status_code": 301
+    },
+    {
+      "name": "Legacy dev laslogs.cc",
+      "expression": "(http.host eq \"dev.laslogs.cc\")",
+      "action": "redirect",
+      "target": "https://dev.laslogtmx.com${uri.path}",
+      "status_code": 301
+    }
+  ],
+  "cache_rules": [
+    {
+      "name": "Bypass cache for API routes",
+      "expression": "(http.request.uri.path starts_with \"/api/\")",
+      "action": "bypass_cache"
+    },
+    {
+      "name": "Bypass cache for auth pages",
+      "expression": "(http.request.uri.path starts_with \"/auth/\")",
+      "action": "bypass_cache"
+    },
+    {
+      "name": "Cache static assets",
+      "expression": "(http.request.uri.path starts_with \"/logos/\") or (http.request.uri.path matches \"^/_next/static/.*\")",
+      "action": "cache",
+      "edge_ttl": 31536000,
+      "browser_ttl": 31536000
+    }
+  ],
+  "transform_rules": [
+    {
+      "name": "Set security headers (fallback)",
+      "type": "response",
+      "expression": "true",
+      "headers": {
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "Referrer-Policy": "strict-origin-when-cross-origin"
+      }
+    },
+    {
+      "name": "Normalize CF-Connecting-IP passthrough",
+      "type": "request",
+      "expression": "(http.request.uri.path starts_with \"/api/\")",
+      "headers": {
+        "X-Real-IP": "ip.src"
+      }
+    }
+  ],
+  "rate_limiting": [
+    {
+      "name": "Signup risk API",
+      "expression": "(http.request.uri.path eq \"/api/auth/signup-risk\")",
+      "requests_per_period": 30,
+      "period_seconds": 60,
+      "action": "block",
+      "timeout_seconds": 300
+    },
+    {
+      "name": "Push webhook",
+      "expression": "(http.request.uri.path eq \"/api/push/send\")",
+      "requests_per_period": 60,
+      "period_seconds": 60,
+      "action": "block",
+      "timeout_seconds": 600
+    },
+    {
+      "name": "Global auth endpoints",
+      "expression": "(http.request.uri.path starts_with \"/auth/\")",
+      "requests_per_period": 20,
+      "period_seconds": 60,
+      "action": "managed_challenge",
+      "timeout_seconds": 120
+    }
+  ],
+  "staging": {
+    "hostname": "dev.laslogtmx.com",
+    "cloudflare_pages_branch": "dev",
+    "env_file": ".env.local",
+    "env_overrides": {
+      "NEXT_PUBLIC_APP_URL": "https://dev.laslogtmx.com",
+      "NEXT_PUBLIC_WEB_APP_URL": "https://dev.laslogtmx.com",
+      "NEXT_PUBLIC_DEV_URL": "https://dev.laslogtmx.com"
+    }
+  }
+}

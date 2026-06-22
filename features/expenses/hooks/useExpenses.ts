@@ -105,6 +105,8 @@ export function useExpenses() {
           notes: input.notes?.trim() || null,
           ocr_raw_text: input.ocr_raw_text ?? null,
           user_confirmed: true,
+          load_id: input.load_id ?? null,
+          load_number: input.load_number?.trim() || null,
         })
         .select()
         .single();

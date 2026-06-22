@@ -11,6 +11,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import { getGlassCardStyle, MOBILE_GLASS_HIGHLIGHT } from '../../../packages/shared/src/utils/glass';
 import { REFUND_ADMIN_ESCALATION_THRESHOLD_USD } from '../constants';
 
 interface RefundRequestSheetProps {
@@ -59,7 +60,8 @@ export const RefundRequestSheet: React.FC<RefundRequestSheetProps> = ({
         style={styles.overlay}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={styles.sheet}>
+        <View style={[styles.sheet, getGlassCardStyle({ sheet: true })]}>
+          <View style={MOBILE_GLASS_HIGHLIGHT} />
           <View style={styles.handle} />
 
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -148,9 +150,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 23, 42, 0.45)',
   },
   sheet: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    // glass via getGlassCardStyle({sheet:true}) + highlight
     maxHeight: '88%',
     paddingBottom: Platform.OS === 'ios' ? 24 : 16,
   },

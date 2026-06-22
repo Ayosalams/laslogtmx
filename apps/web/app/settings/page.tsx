@@ -86,6 +86,19 @@ export default function SettingsPage() {
       </div>
 
       <Link
+        href="/settings/verification"
+        className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center hover:border-[#00bfff]/40 transition"
+      >
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Company Verification</h2>
+          <p className="text-sm text-gray-500">
+            Self-attest DOT/MC, view trust badge, and ratings.
+          </p>
+        </div>
+        <span className="text-gray-400 text-xl">›</span>
+      </Link>
+
+      <Link
         href="/settings/notifications"
         className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center hover:border-[#00bfff]/40 transition"
       >

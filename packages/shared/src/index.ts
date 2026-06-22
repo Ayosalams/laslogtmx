@@ -7,6 +7,7 @@ export * from './auth/AuthContext';
 export * from './auth/types';
 export * from './hooks/useCurrentTime';
 export * from './utils/formatTime';
+export * from './utils/glass';
 export * from './fraud/constants';
 export * from './fraud/types';
 export * from './fraud/fingerprint';

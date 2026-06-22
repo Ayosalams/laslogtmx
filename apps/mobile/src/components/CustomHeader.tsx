@@ -1,12 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useCurrentTime } from '../../../../packages/shared/src/hooks/useCurrentTime';
+import { getGlassCardStyle, MOBILE_GLASS_HIGHLIGHT } from '../../../../packages/shared/src/utils/glass';
 
 export const CustomHeader: React.FC = () => {
   const currentTime = useCurrentTime();
+  const glassHeader = getGlassCardStyle();
 
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, glassHeader]}>
+      <View style={MOBILE_GLASS_HIGHLIGHT} />
       <Text style={styles.title}>laslogTMX</Text>
       <View style={styles.timePill}>
         <Text style={styles.timeText}>{currentTime}</Text>
@@ -22,9 +25,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: '#fff',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e5e5e5',
+    // glass styles injected via util (subtle + performant)
+    borderBottomWidth: 0,
     // iOS/Android safe top padding can be added via SafeArea in parent
   },
   title: {
@@ -34,7 +36,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   timePill: {
-    backgroundColor: 'rgba(243,244,246,0.7)', // subtle gray
+    backgroundColor: 'rgba(224,242,254,0.7)', // light electric blue tint per brand
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 999,
@@ -43,7 +45,7 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#555',
+    color: '#00BFFF',
     fontVariant: ['tabular-nums'],
   },
 });

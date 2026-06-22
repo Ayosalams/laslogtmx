@@ -9,7 +9,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-notifications',
       {
-        color: '#1E40AF',
+        color: '#00BFFF', // Electric Blue per lasbrandSKILL.md
       },
     ],
     [
@@ -31,6 +31,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     infoPlist: {
       NSFaceIDUsageDescription:
         'laslogTMX uses Face ID to verify your identity for signup and high-risk actions.',
+      // iOS Live Activities + Widget support (detention timer + today's loads)
+      // Requires dev build / prebuild + Xcode Widget Extension + ActivityKit capability for full function
+      NSSupportsLiveActivities: true,
+      NSSupportsLiveActivitiesFrequentUpdates: true,
     },
   },
   android: {

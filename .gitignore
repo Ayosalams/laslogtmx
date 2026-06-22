@@ -2,4 +2,10 @@
 .next
 .expo
 .env
+.env.local
+.env.*.local
 .turbo
+supabase/.env*
+.backup/
+*.log
+.DS_Store

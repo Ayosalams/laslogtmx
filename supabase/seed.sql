@@ -4,14 +4,16 @@
 -- =============================================================================
 
 -- Sample Companies (carriers / brokers)
-insert into public.companies (id, name, dot_number, mc_number, is_active, subscription_tier, billing_interval)
+insert into public.companies (id, name, dot_number, mc_number, is_active, subscription_tier, billing_interval, is_laslog_verified, company_type)
 values 
-  ('11111111-1111-1111-1111-111111111111', 'ACME Freight LLC', '1234567', 'MC-123456', true, 'pro', 'monthly'),
-  ('22222222-2222-2222-2222-222222222222', 'Midwest Customs Brokers', '9876543', 'MC-987654', true, 'pro_broker', 'yearly'),
-  ('33333333-3333-3333-3333-333333333333', 'Pacific Haulers Co', '5555555', 'MC-555555', true, 'starter', 'monthly')
+  ('11111111-1111-1111-1111-111111111111', 'ACME Freight LLC', '1234567', 'MC-123456', true, 'pro', 'monthly', true, 'carrier'),
+  ('22222222-2222-2222-2222-222222222222', 'Midwest Customs Brokers', '9876543', 'MC-987654', true, 'pro_broker', 'yearly', true, 'broker'),
+  ('33333333-3333-3333-3333-333333333333', 'Pacific Haulers Co', '5555555', 'MC-555555', true, 'starter', 'monthly', false, 'carrier')
 on conflict (id) do update set
   subscription_tier = excluded.subscription_tier,
-  billing_interval = excluded.billing_interval;
+  billing_interval = excluded.billing_interval,
+  is_laslog_verified = excluded.is_laslog_verified,
+  company_type = excluded.company_type;
 
 -- Note on Profiles:
 -- Profiles are automatically created via the handle_new_user() trigger when a user signs up through Supabase Auth.
@@ -23,11 +25,12 @@ on conflict (id) do update set
 --
 -- Or create test users in the Supabase Auth UI and link them here.
 
--- Sample Loads (for the first company)
-insert into public.loads (company_id, load_number, status, origin, destination, pickup_date, delivery_date)
+-- Sample Loads (operational + internal board)
+insert into public.loads (company_id, load_number, status, origin, destination, pickup_date, delivery_date, is_internal_board, board_status, is_laslog_verified, equipment, rate_cents, commodity)
 values 
-  ('11111111-1111-1111-1111-111111111111', 'L-4821', 'pending', 'Chicago, IL', 'Atlanta, GA', now() + interval '1 day', now() + interval '3 days'),
-  ('11111111-1111-1111-1111-111111111111', 'L-4822', 'in_transit', 'Dallas, TX', 'Houston, TX', now() - interval '1 day', now() + interval '1 day')
+  ('11111111-1111-1111-1111-111111111111', 'L-4821', 'pending', 'Chicago, IL', 'Atlanta, GA', now() + interval '1 day', now() + interval '3 days', false, 'open', true, null, null, null),
+  ('11111111-1111-1111-1111-111111111111', 'L-4822', 'in_transit', 'Dallas, TX', 'Houston, TX', now() - interval '1 day', now() + interval '1 day', false, 'open', true, null, null, null),
+  ('22222222-2222-2222-2222-222222222222', 'IB-DEMO-001', 'pending', 'Los Angeles, CA', 'Phoenix, AZ', now() + interval '2 days', now() + interval '4 days', true, 'open', true, 'Dry Van', 280000, 'Electronics')
 on conflict do nothing;
 
 -- Sample Channels (company + load-specific) - will be created by the app or manually

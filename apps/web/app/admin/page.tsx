@@ -19,6 +19,7 @@ import {
 import { CBLE_CATEGORIES } from "../../../../features/cble-prep/constants";
 import type { AdminTabId } from "../../../../features/admin/types";
 import type { CbleMaterialType, CbleCategoryId } from "../../../../features/cble-prep/types";
+import { VerificationAdminPanelWeb } from "../../../../features/verification/components/VerificationAdminPanelWeb";
 
 function formatAmount(cents: number | null | undefined): string {
   if (cents == null) return "—";
@@ -318,6 +319,8 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+
+        {activeTab === "verification" && <VerificationAdminPanelWeb />}
 
         {activeTab === "users" && (
           <div>

@@ -9,16 +9,19 @@ import {
   RefreshControl,
   SafeAreaView,
 } from 'react-native';
-import { useCurrentTime } from '../../../packages/shared/src/hooks/useCurrentTime';
-import { useSettings } from '../../../packages/shared/src/context/SettingsContext';
-import { formatMessageTime } from '../../../packages/shared/src/utils/formatTime';
+import { useMilitaryClock } from '../../../packages/shared/src/hooks/useMilitaryClock';
+import { DetentionTimerBanner } from '../../detention-timer/components/DetentionTimerBanner';
+import { useDetentionTimer } from '../../detention-timer/hooks/useDetentionTimer';
 import { EXPENSE_CATEGORIES, BRAND } from '../../receipt-ocr/constants';
+import { buildManualOcrDefaults } from '../../receipt-ocr/utils/parseReceiptText';
+import { buildDetentionClaimOcrDefaults } from '../../detention-timer/utils/detentionUtils';
 import { useExpenses } from '../hooks/useExpenses';
 import type { Expense } from '../types';
 
 interface Props {
   navigation?: {
     navigate: (screen: string, params?: object) => void;
+    getParent?: () => { navigate: (screen: string, params?: object) => void } | undefined;
   };
 }
 
@@ -32,18 +35,14 @@ function formatExpenseDate(dateStr: string): string {
   return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-function ExpenseRow({ item, isMilitaryTime }: { item: Expense; isMilitaryTime: boolean }) {
-  const timeLabel = item.expense_time
-    ? formatMessageTime(
-        (() => {
-          const [h, min] = item.expense_time!.split(':').map(Number);
-          const d = new Date();
-          d.setHours(h, min, 0, 0);
-          return d;
-        })(),
-        isMilitaryTime
-      )
-    : null;
+function formatMilitaryTime(timeStr: string): string {
+  const match = timeStr.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+  if (!match) return timeStr;
+  return `${Number(match[1]).toString().padStart(2, '0')}:${match[2]}`;
+}
+
+function ExpenseRow({ item }: { item: Expense }) {
+  const timeLabel = item.expense_time ? formatMilitaryTime(item.expense_time) : null;
 
   return (
     <View style={styles.row}>
@@ -52,6 +51,7 @@ function ExpenseRow({ item, isMilitaryTime }: { item: Expense; isMilitaryTime: b
         <Text style={styles.meta}>
           {getCategoryLabel(item.category)} • {formatExpenseDate(item.expense_date)}
           {timeLabel ? ` • ${timeLabel}` : ''}
+          {item.load_number ? ` • Load ${item.load_number}` : ''}
         </Text>
       </View>
       <Text style={styles.amount}>${Number(item.amount).toFixed(2)}</Text>
@@ -60,21 +60,64 @@ function ExpenseRow({ item, isMilitaryTime }: { item: Expense; isMilitaryTime: b
 }
 
 export const ExpenseListScreen: React.FC<Props> = ({ navigation }) => {
-  const currentTime = useCurrentTime();
-  const { isMilitaryTime } = useSettings();
+  const currentTime = useMilitaryClock();
   const { expenses, loading, refresh, error, companyId } = useExpenses();
+  const { session: detentionSession, buildClaimDraft } = useDetentionTimer();
+
+  const stackNav = navigation?.getParent?.() ?? navigation;
 
   const startScan = useCallback(() => {
-    const nav = navigation?.getParent?.() ?? navigation;
-    nav?.navigate('ReceiptCapture');
-  }, [navigation]);
+    stackNav?.navigate('ReceiptCapture');
+  }, [stackNav]);
+
+  const startManualEntry = useCallback(() => {
+    const detentionContext = detentionSession
+      ? {
+          loadNumber: detentionSession.loadNumber,
+          loadId: detentionSession.loadId,
+          facility: detentionSession.facility,
+        }
+      : undefined;
+
+    stackNav?.navigate('ReceiptCorrection', {
+      manual: true,
+      ocrResult: buildManualOcrDefaults(),
+      detentionContext,
+    });
+  }, [stackNav, detentionSession]);
+
+  const startDetentionScan = useCallback(() => {
+    if (!detentionSession) {
+      startScan();
+      return;
+    }
+    stackNav?.navigate('ReceiptCapture');
+  }, [stackNav, detentionSession, startScan]);
+
+  const startDetentionClaim = useCallback(() => {
+    const claim = buildClaimDraft();
+    if (!claim) {
+      startManualEntry();
+      return;
+    }
+    stackNav?.navigate('ReceiptCorrection', {
+      manual: true,
+      ocrResult: buildDetentionClaimOcrDefaults(claim),
+      detentionContext: {
+        loadNumber: claim.loadNumber,
+        loadId: claim.loadId,
+        facility: claim.facility,
+      },
+      detentionClaim: true,
+    });
+  }, [buildClaimDraft, stackNav, startManualEntry]);
 
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
         data={expenses}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ExpenseRow item={item} isMilitaryTime={isMilitaryTime} />}
+        renderItem={({ item }) => <ExpenseRow item={item} />}
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={refresh} tintColor={BRAND.accent} />
         }
@@ -83,18 +126,32 @@ export const ExpenseListScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.headerRow}>
               <View>
                 <Text style={styles.title}>Expenses</Text>
-                <Text style={styles.subtitle}>Receipt OCR with mandatory review</Text>
+                <Text style={styles.subtitle}>Receipt OCR • manual entry • detention linking</Text>
               </View>
               <View style={styles.timePill}>
                 <Text style={styles.timeText}>{currentTime}</Text>
               </View>
             </View>
 
+            <DetentionTimerBanner
+              onScanExpense={startDetentionScan}
+              onGenerateClaim={detentionSession ? startDetentionClaim : undefined}
+            />
+
             <TouchableOpacity style={styles.scanBtn} onPress={startScan} activeOpacity={0.85}>
               <Text style={styles.scanBtnIcon}>📷</Text>
               <View style={styles.scanBtnTextWrap}>
                 <Text style={styles.scanBtnTitle}>Scan Receipt</Text>
                 <Text style={styles.scanBtnSub}>Capture → OCR → Review → Save</Text>
+              </View>
+              <Text style={styles.scanBtnArrow}>→</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.manualBtn} onPress={startManualEntry} activeOpacity={0.85}>
+              <Text style={styles.manualBtnIcon}>✏️</Text>
+              <View style={styles.scanBtnTextWrap}>
+                <Text style={styles.manualBtnTitle}>Manual Entry</Text>
+                <Text style={styles.scanBtnSub}>No receipt — enter amount and details directly</Text>
               </View>
               <Text style={styles.scanBtnArrow}>→</Text>
             </TouchableOpacity>
@@ -117,7 +174,7 @@ export const ExpenseListScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.empty}>
               <Text style={styles.emptyTitle}>No expenses yet</Text>
               <Text style={styles.emptySub}>
-                Scan your first receipt to log fuel, tolls, maintenance, and more.
+                Scan a receipt or use manual entry to log fuel, tolls, detention, and more.
               </Text>
             </View>
           ) : null
@@ -161,10 +218,24 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 3,
     gap: 12,
+    marginBottom: 10,
+  },
+  manualBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: BRAND.card,
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: BRAND.border,
+    gap: 12,
+    marginBottom: 8,
   },
   scanBtnIcon: { fontSize: 28 },
+  manualBtnIcon: { fontSize: 24 },
   scanBtnTextWrap: { flex: 1 },
   scanBtnTitle: { fontSize: 16, fontWeight: '700', color: BRAND.text },
+  manualBtnTitle: { fontSize: 16, fontWeight: '600', color: BRAND.text },
   scanBtnSub: { fontSize: 12, color: BRAND.textMuted, marginTop: 2 },
   scanBtnArrow: { fontSize: 20, color: BRAND.accent, fontWeight: '600' },
   warningBox: {

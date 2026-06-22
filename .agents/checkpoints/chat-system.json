@@ -1,7 +1,7 @@
-﻿{
+{
     "feature": "Chat System",
     "status": "Completed",
-    "last_updated": "2026-06-13",
+    "last_updated": "2026-06-21",
     "completed": [
         "Database schema (channels, messages, channel_members, reports)",
         "Full RLS policies for company + load isolation",
@@ -10,16 +10,20 @@
         "ChatMessageBubble with military time",
         "Report message functionality",
         "Navigation between list and room",
-        "Company Team Chat + Load-Specific Chat"
+        "Company Team Chat + Load-Specific Chat",
+        "Web parity: /chat list + /chat/[channelId] with ChatListWeb, ChatRoomWeb, realtime",
+        "Web Phase 2: ChatAvatar placeholders, typing indicators (Supabase broadcast), read receipts (broadcast)"
     ],
     "next_steps": [
-        "Add avatars / typing indicators (optional Phase 2)",
-        "Seed initial company channels on user signup"
+        "Seed initial company channels on user signup",
+        "Server-side message_reads table for durable read receipts",
+        "Avatar images from profiles.avatar_url when available"
     ],
     "key_decisions": [
         "No public/general chat lounge in v1",
         "Strong company isolation",
-        "Military time on all timestamps"
+        "Military time on all timestamps",
+        "Typing/read state via Supabase Realtime broadcast (no new DB tables)"
     ],
     "blockers": [
         "Apply migration to Supabase"

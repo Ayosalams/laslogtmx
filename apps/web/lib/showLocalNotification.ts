@@ -13,7 +13,7 @@ export function showLocalNotification(
 
   const notification = new Notification(title, {
     body,
-    icon: '/icon-192.png',
+    icon: '/logos/TMX_Icon_Logo_actual.png',
     data: data ?? {},
   });
 

@@ -1,1 +1,40 @@
-﻿{}
+{
+  "checkpoint": "cloudflare-domain-migration",
+  "version": "2026-06-21",
+  "status": "complete",
+  "backup_branch": "backup-before-cloudflare-domain-migration",
+  "domains": {
+    "marketing": "laslogtmx.com",
+    "app": "app.laslogtmx.com",
+    "staging": "dev.laslogtmx.com",
+    "legacy_redirects": ["laslogs.cc", "www.laslogs.cc", "app.laslogs.cc", "dev.laslogs.cc"]
+  },
+  "cloudflare": {
+    "hsts": { "enabled": true, "preload": true, "max_age": 31536000 },
+    "waf": { "enabled": true, "managed_rulesets": ["cloudflare-managed", "cloudflare-owasp"] },
+    "page_shield": { "enabled": true },
+    "redirect_rules": "deployed",
+    "cache_rules": "deployed",
+    "transform_rules": "deployed",
+    "rate_limiting": "deployed"
+  },
+  "files": {
+    "manifest": "infra/cloudflare/rules-manifest.json",
+    "headers": "apps/web/public/_headers",
+    "redirects": "apps/web/public/_redirects",
+    "wrangler": "apps/web/wrangler.toml",
+    "constants": "packages/shared/src/constants/index.ts"
+  },
+  "staging": {
+    "hostname": "dev.laslogtmx.com",
+    "pages_branch": "dev",
+    "env_overrides": ["NEXT_PUBLIC_APP_URL", "NEXT_PUBLIC_WEB_APP_URL"]
+  },
+  "verification": {
+    "laslogs_cc_in_app_code": 0,
+    "laslogs_cc_in_redirect_config_only": true,
+    "web_build": "pass (with Supabase env vars set)",
+    "mobile_build": "pre-existing TS error in ExpenseListScreen.tsx — unrelated to migration",
+    "turbo_build": "pre-existing: missing packageManager field in root package.json"
+  }
+}
