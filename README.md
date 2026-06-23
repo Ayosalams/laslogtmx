@@ -91,6 +91,47 @@ select * from fraud_flags where reason like 'high_risk:%' order by created_at de
 
 Checkpoint: [`.agents/checkpoints/fraud-prevention.json`](.agents/checkpoints/fraud-prevention.json)
 
+## Production Readiness: Monitoring + Hardening (Top 3)
+
+Implemented (lightweight for one-man shop):
+
+1. **Sentry Error Monitoring + client tracking (web + mobile)**
+   - `@sentry/nextjs` + `@sentry/react-native`
+   - Shared `captureException` + `initSentry` (packages/shared/src/utils/errorLogger.ts)
+   - Auto global error + promise rejection handlers on web
+   - Best-effort Supabase "unified_logs" table writes for unified visibility (create table if desired)
+
+2. **Proper Auth Gating on all web routes (Next.js Middleware)**
+   - `apps/web/middleware.ts` redirects unauthenticated visitors (no session marker cookie) from protected routes → `/auth/login`
+   - Protected: `/load-board*`, `/chat*`, `/admin*`, `/settings*`, `/receipts*`, `/expenses*`, `/motus*`
+   - Works with existing client AuthProvider + lightweight `laslogtmx-auth` cookie set on login
+   - Server RLS + client `useAuth` remain primary security
+
+3. **App-level Rate Limiting on Load Board (post + bid)**
+   - Uses Upstash Redis via `@upstash/ratelimit` when configured (5/min default)
+   - Graceful fallback to in-memory (dev)
+   - Enforced in `useLoadBoard.postLoad` and `useBidding.submitBid`
+   - Keys per company; capture errors to Sentry
+
+### Setup Instructions (Monitoring)
+
+1. Copy `.env.example` → `.env.local`
+2. Sentry:
+   - Sign up at sentry.io (free tier)
+   - Create project (Next.js + React Native)
+   - Paste `NEXT_PUBLIC_SENTRY_DSN=...` (public client key)
+3. Upstash (rate limiting):
+   - console.upstash.com → Create Redis DB (free)
+   - Copy REST URL + TOKEN → `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`
+4. (Optional) Unified Logs:
+   - In Supabase SQL: `CREATE TABLE IF NOT EXISTS public.unified_logs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), level text, message text, meta jsonb, created_at timestamptz DEFAULT now());` + enable RLS if needed for service role only.
+5. Rebuild after `npm install`
+6. Admin → new top monitoring quick links to dashboards
+
+Update your Supabase Auth redirect URLs and Cloudflare if adding domains.
+
+Checkpoint: [`.agents/checkpoints/production-hardening.json`](.agents/checkpoints/production-hardening.json)
+
 Built as a lean one-man shop using Antigravity (primary) + Grok + hybrid AI stack (Ollama, OpenCode, OpenRouter, Genspark).
 
 ## Hybrid AI Development Workflow
