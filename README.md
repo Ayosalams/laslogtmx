@@ -91,4 +91,21 @@ select * from fraud_flags where reason like 'high_risk:%' order by created_at de
 
 Checkpoint: [`.agents/checkpoints/fraud-prevention.json`](.agents/checkpoints/fraud-prevention.json)
 
-Built as a lean one-man shop using Antigravity 2.0 + Grok.
+Built as a lean one-man shop using Antigravity (primary) + Grok + hybrid AI stack (Ollama, OpenCode, OpenRouter, Genspark).
+
+## Hybrid AI Development Workflow
+
+**Primary build environment**: Antigravity IDE (Gemini-powered) with Grok Build MCP delegate. Use for all active laslogTMX development to retain full project context + MCP (GitHub + Supabase).
+
+See the full recommended hybrid stack, usage guidelines, setup instructions, and quick-switch aliases in:
+- [skills/hybrid-ai-workflowSKILL.md](skills/hybrid-ai-workflowSKILL.md)
+- Required skill referenced from [.agents/laslogtmx-agents.json](.agents/laslogtmx-agents.json)
+
+### Quick Reference (see SKILL.md for details + PowerShell profile aliases)
+- **Default**: Open Antigravity on workspace → use Grok Build delegate inside.
+- **Local/privacy**: `ollama run glm-5` (after Ollama install) + pair with OpenCode.
+- **Ideation/prototypes**: Genspark AI Developer.
+- **Model variety**: OpenRouter (configure in OpenCode / Grok Build).
+- **Verify MCP**: `.\infra\mcp\verify-mcp.ps1`
+
+**Core guideline**: Default to Antigravity/Grok. Switch only when privacy, cost, offline, or unique capability is required. Always run SAFETY CHECK first.
