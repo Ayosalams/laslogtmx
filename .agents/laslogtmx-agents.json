@@ -1,7 +1,7 @@
 ﻿{
     "name": "laslogTMX Multi-Agent System",
-    "version": "2026-06-13",
-    "description": "Orchestration for laslogTMX (Web + Mobile monorepo)",
+    "version": "2026-06-22",
+    "description": "Orchestration for laslogTMX (Web + Mobile monorepo) using hybrid AI workflow (Antigravity primary + Ollama/OpenCode/etc)",
     "primary_domain": "laslogtmx.com",
     "environments": [
         "production",
@@ -36,7 +36,8 @@
         "safetySKILL.md",
         "lasbrandSKILL.md",
         "webbuildSKILL.md",
-        "mobileSKILL.md"
+        "mobileSKILL.md",
+        "hybrid-ai-workflowSKILL.md"
     ],
-    "workflow": "SAFETY CHECK (read safetySKILL.md) → Grok plans (with safety adherence stated) → Specialist agent executes → Grok reviews & creates checkpoint"
+    "workflow": "SAFETY CHECK (read safetySKILL.md + hybrid-ai-workflowSKILL.md) → Grok plans (Antigravity primary) → Use hybrid: Antigravity/Grok for main, Ollama/GLM/OpenCode for local/privacy, Genspark/OpenRouter for ideation/variety → Specialist executes → Grok reviews & creates checkpoint"
 }
