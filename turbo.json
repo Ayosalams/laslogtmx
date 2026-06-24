@@ -11,7 +11,8 @@
       "outputs": [
         ".next/**",
         "out/**",
-        "dist/**"
+        "dist/**",
+        ".open-next/**"
       ]
     },
     "build:marketing": {

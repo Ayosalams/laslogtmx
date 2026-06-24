@@ -1,27 +1,36 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "laslogtmx-web",
-  "compatibility_date": "2026-06-21",
+  "name": "laslogtmx-app",
+  "compatibility_date": "2026-06-24",
   "compatibility_flags": ["nodejs_compat"],
-  // Full Next.js on CF Pages: static assets + _worker.js from OpenNext adapter build
+  // Proper Cloudflare Pages + Next.js 15 config for full app (SSR, API routes, middleware, dynamic routes)
+  // Uses OpenNext adapter output for active routes + static assets.
+  // Build with opennextjs-cloudflare (after `npm i -D @opennextjs/cloudflare` in apps/web or root):
+  //   npx opennextjs-cloudflare build   (produces .open-next/)
   "main": ".open-next/worker.js",
   "pages_build_output_dir": ".open-next/assets",
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  // Self-reference for advanced OpenNext (e.g. server actions, revalidations). Update name if needed.
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "laslogtmx-web"
+      "service": "laslogtmx-app"
     }
   ],
   "env": {
     "production": {
-      "name": "laslogtmx-web"
+      "name": "laslogtmx-app"
     },
     "preview": {
-      "name": "laslogtmx-web-staging"
+      "name": "laslogtmx-app-staging"
     }
   }
+  // RECOMMENDED Cloudflare Build watch paths (for monorepo to avoid unnecessary builds):
+  // In CF dashboard: laslogtmx-app project -> Settings -> Build -> Build watch paths
+  //   Include paths: apps/web/*
+  //   Exclude paths: (empty, or e.g. apps/marketing/*, packages/*, features/* if desired)
+  // This ensures only changes under apps/web trigger deploys for this Pages project.
 }
