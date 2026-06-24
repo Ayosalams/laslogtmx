@@ -3,6 +3,8 @@ import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../packages/shared/src/auth/AuthContext';
 import type { BoardLoad, PostLoadInput } from '../types';
 import { useLoadBoardAccess } from './useLoadBoardAccess';
+import { checkRateLimit, LOADBOARD_POST_LIMIT } from '../../../packages/shared/src/utils/rateLimiter';
+import { captureException } from '../../../packages/shared/src/utils/errorLogger';
 
 function generateLoadNumber(): string {
   const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
@@ -81,6 +83,24 @@ export function useLoadBoard() {
         return { load: null, error: new Error('Only verified brokers may post loads.') };
       }
 
+      // App-level rate limiting (Load Board posting)
+      try {
+        const rate = await checkRateLimit(
+          `loadboard:post:${profile.company_id}`,
+          LOADBOARD_POST_LIMIT.max,
+          LOADBOARD_POST_LIMIT.window
+        );
+        if (!rate.success) {
+          const msg = 'Rate limit exceeded for posting loads. Please wait a minute and try again.';
+          setError(msg);
+          captureException(new Error(msg), { feature: 'load-board', action: 'postLoad', companyId: profile.company_id });
+          return { load: null, error: new Error(msg) };
+        }
+      } catch (rateErr) {
+        captureException(rateErr, { feature: 'load-board', action: 'rate-check' });
+        // continue (fail-open for UX in fallback)
+      }
+
       setPosting(true);
       setError(null);
 
@@ -117,6 +137,7 @@ export function useLoadBoard() {
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Post failed';
         setError(message);
+        captureException(err, { feature: 'load-board', action: 'postLoad' });
         return { load: null, error: new Error(message) };
       } finally {
         setPosting(false);

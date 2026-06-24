@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SettingsProvider } from '../../../packages/shared/src/context/SettingsContext';
 import { AuthProvider } from '../../../packages/shared/src/auth/AuthContext';
 import { BiometricProvider } from '../../../packages/shared/src/biometrics/BiometricContext';
@@ -11,6 +11,20 @@ import { showLocalNotification } from '../lib/showLocalNotification';
 import { Header } from '../components/Header';
 import { AppNav } from '../components/AppNav';
 import { AdminNavLink } from '../components/AdminNavLink';
+import { initSentry, captureException } from '../../../packages/shared/src/utils/errorLogger';
+
+// Initialize Sentry Error Monitoring (client-side) — DSN from .env only (async safe)
+void initSentry(process.env.NEXT_PUBLIC_SENTRY_DSN);
+
+// Basic global unhandled error tracking for production readiness
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (event) => {
+    captureException(event.error || new Error(event.message), { feature: 'global', source: 'window.onerror' });
+  });
+  window.addEventListener('unhandledrejection', (event) => {
+    captureException(event.reason, { feature: 'global', source: 'unhandledrejection' });
+  });
+}
 
 export default function RootLayout({
   children,

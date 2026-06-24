@@ -104,6 +104,37 @@ export default function AdminPage() {
         </span>
       </div>
 
+      {/* Basic Monitoring Dashboard Links (production readiness) */}
+      <div className="bg-white border-b border-gray-100 px-6 py-3">
+        <div className="flex flex-wrap gap-3 text-xs">
+          <a
+            href="https://sentry.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-100 hover:bg-red-100"
+          >
+            Sentry Error Dashboard ↗
+          </a>
+          <a
+            href="https://supabase.com/dashboard"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100"
+          >
+            Supabase Logs / DB ↗
+          </a>
+          <a
+            href="https://console.upstash.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-100 hover:bg-sky-100"
+          >
+            Upstash Rate Limit Redis ↗
+          </a>
+          <span className="text-[10px] self-center text-gray-400">Configure DSNs/tokens in .env.local</span>
+        </div>
+      </div>
+
       <div className="bg-white border-b border-gray-200 flex">
         {ADMIN_TABS.map((tab) => (
           <button

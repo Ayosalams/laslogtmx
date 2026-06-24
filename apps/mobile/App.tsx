@@ -14,6 +14,10 @@ import { NotificationRegistration } from '../../packages/shared/src/notification
 import { PushNotificationBridge } from '../../packages/shared/src/notifications/PushNotificationBridge';
 import { mobileBiometricAdapter } from './src/lib/mobileBiometrics';
 import { registerForExpoPush, showLocalNotification } from './src/lib/mobilePush';
+import { initSentry } from '../../packages/shared/src/utils/errorLogger';
+
+// Initialize Sentry for mobile (Expo/React Native) — client tracking
+void initSentry(process.env.EXPO_PUBLIC_SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN);
 
 // Adapter so SettingsContext can persist using AsyncStorage on mobile
 const asyncStorageAdapter = {

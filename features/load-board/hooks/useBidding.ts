@@ -3,6 +3,8 @@ import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../packages/shared/src/auth/AuthContext';
 import type { BoardLoad, LoadBid, LoadContract, SubmitBidInput } from '../types';
 import { useLoadBoardAccess } from './useLoadBoardAccess';
+import { checkRateLimit, LOADBOARD_BID_LIMIT } from '../../../packages/shared/src/utils/rateLimiter';
+import { captureException } from '../../../packages/shared/src/utils/errorLogger';
 
 async function ensureNegotiationChannel(
   load: BoardLoad,
@@ -133,6 +135,23 @@ export function useBidding(loadId: string | undefined) {
         return { bid: null, error: new Error('You cannot bid on your own load.') };
       }
 
+      // App-level rate limiting (Load Board bidding)
+      try {
+        const rate = await checkRateLimit(
+          `loadboard:bid:${profile.company_id}`,
+          LOADBOARD_BID_LIMIT.max,
+          LOADBOARD_BID_LIMIT.window
+        );
+        if (!rate.success) {
+          const msg = 'Rate limit exceeded for bidding. Please wait a minute and try again.';
+          setError(msg);
+          captureException(new Error(msg), { feature: 'load-board', action: 'submitBid', companyId: profile.company_id });
+          return { bid: null, error: new Error(msg) };
+        }
+      } catch (rateErr) {
+        captureException(rateErr, { feature: 'load-board', action: 'rate-check-bid' });
+      }
+
       setSubmitting(true);
       setError(null);
 
@@ -161,6 +180,7 @@ export function useBidding(loadId: string | undefined) {
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Bid failed';
         setError(message);
+        captureException(err, { feature: 'load-board', action: 'submitBid' });
         return { bid: null, error: new Error(message) };
       } finally {
         setSubmitting(false);

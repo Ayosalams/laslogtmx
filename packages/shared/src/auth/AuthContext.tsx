@@ -97,6 +97,11 @@ export const AuthProvider: React.FC<{
             isAuthenticated: true,
             hasCompany: !!profile?.company_id,
           });
+
+          // Lightweight cookie marker for Next.js middleware auth gating (web only)
+          if (typeof document !== 'undefined') {
+            document.cookie = 'laslogtmx-auth=1; path=/; max-age=86400; SameSite=Lax';
+          }
         } else {
           setState({
             user: null,
@@ -107,6 +112,11 @@ export const AuthProvider: React.FC<{
             isAuthenticated: false,
             hasCompany: false,
           });
+
+          // Clear marker on signout (web)
+          if (typeof document !== 'undefined') {
+            document.cookie = 'laslogtmx-auth=; path=/; max-age=0; SameSite=Lax';
+          }
         }
       }
     );
@@ -128,6 +138,9 @@ export const AuthProvider: React.FC<{
           isAuthenticated: true,
           hasCompany: !!profile?.company_id,
         });
+        if (typeof document !== 'undefined') {
+          document.cookie = 'laslogtmx-auth=1; path=/; max-age=86400; SameSite=Lax';
+        }
       } else {
         setState((prev) => ({ ...prev, loading: false }));
       }
