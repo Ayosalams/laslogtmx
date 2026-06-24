@@ -2,6 +2,7 @@
   "name": "laslogtmx",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@11.0.0",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -9,8 +10,10 @@
   "scripts": {
     "dev:web": "turbo run dev --filter=web",
     "dev:mobile": "turbo run start --filter=mobile",
+    "dev:marketing": "turbo run dev --filter=marketing",
     "build:web": "turbo run build --filter=web",
     "build:mobile": "turbo run build --filter=mobile",
+    "build:marketing": "turbo run build --filter=marketing",
     "lint": "turbo run lint",
     "clean": "turbo run clean && rm -rf node_modules"
   },

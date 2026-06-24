@@ -3,13 +3,14 @@
   "globalDependencies": [
     ".env.*"
   ],
-  "pipeline": {
+  "tasks": {
     "build": {
       "dependsOn": [
         "^build"
       ],
       "outputs": [
         ".next/**",
+        "out/**",
         "dist/**"
       ]
     },

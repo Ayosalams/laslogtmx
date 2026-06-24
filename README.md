@@ -15,32 +15,67 @@
 2. `npm install`
 3. `npm run dev:web` (web) or `npm run dev:mobile` (mobile)
 
-## Cloudflare Deployment
+## Cloudflare Deployment (Multi-Project)
 
-Security and routing are defined in `infra/cloudflare/rules-manifest.json` and applied at the zone level:
+**Two separate Cloudflare Pages projects** (monorepo with Turborepo):
 
-| Setting | Status | Location |
-|---------|--------|----------|
-| HSTS (preload) | Enabled | `_headers` + zone SSL/TLS |
-| WAF (managed + OWASP) | Deployed | Cloudflare dashboard |
-| Page Shield | Enabled | Cloudflare dashboard |
-| Redirect Rules | Deployed | laslogs.cc → laslogtmx.com |
-| Cache Rules | Deployed | API/auth bypass, static assets cached |
-| Transform Rules | Deployed | Security headers + IP passthrough |
-| Rate Limiting | Deployed | signup-risk, push, auth endpoints |
+| Site | CF Project | Root Directory | Production Branch | Purpose |
+|------|------------|----------------|-------------------|---------|
+| laslogtmx.com | `laslogtmx-marketing` | `apps/marketing` | `main` | Marketing / landing |
+| app.laslogtmx.com | `laslogtmx-web` | `apps/web` | `main` | Full TMS web application |
+| dev.laslogtmx.com | (see staging) | (see below) | `develop` | Staging / preview |
 
-Pages config: `apps/web/wrangler.toml`
+Security and routing (zone-level) remain in `infra/cloudflare/rules-manifest.json`. Marketing site uses static export; web app uses full Next.js build output.
 
-### Staging (dev.laslogtmx.com)
+Pages configs:
+- Marketing: `apps/marketing/wrangler.toml`
+- Web: `apps/web/wrangler.toml`
 
-1. Create a `dev` branch in the repo
-2. In Cloudflare Pages → **dev** branch → add custom domain `dev.laslogtmx.com`
-3. Set branch env vars:
+### Exact Cloudflare Pages Dashboard Steps to Create Projects
+
+1. Dashboard → **Pages** → **Create a project** → **Connect to Git** → select the `laslogtmx` repo.
+
+**Create Marketing project (laslogtmx.com):**
+- Project name: `laslogtmx-marketing`
+- **Production branch**: `main`
+- **Root directory**: `apps/marketing`
+- **Build command**: `npm run build:marketing`
+- **Build output directory**: `out`
+- Framework preset: **Next.js** (or None if using pure static)
+- Click **Save and Deploy**
+- After success: Settings → Custom domains → Add domain `laslogtmx.com` (add `www.laslogtmx.com` too if using)
+- (Optional) Add env vars if marketing-specific vars required
+
+**Create / Update Web App project (app.laslogtmx.com):**
+- Project name: `laslogtmx-web`
+- **Production branch**: `main`
+- **Root directory**: `apps/web`
+- **Build command**: `npm run build:web`
+- **Build output directory**: `.vercel/output/static` (match previous adapter config)
+- Deploy
+- Custom domains → Add `app.laslogtmx.com`
+
+**Add env vars (per project in CF dashboard):**
+- In each project: Settings → Environment variables (production + preview)
+- Add the Supabase + other `NEXT_PUBLIC_*` (see `.env.example`). Do NOT commit real keys.
+
+### Staging (dev.laslogtmx.com) on `develop` branch
+
+1. Create and push a `develop` branch.
+2. In **both** CF Pages projects:
+   - Go to the project → **Deployments** tab or Settings → Build & deployments → configure `develop` branch builds.
+   - Add custom domain `dev.laslogtmx.com` (may attach to preview deployment; for full custom often use a dedicated staging Pages project pointing to develop branch).
+3. Set **branch environment variables** (or preview) for both projects:
    - `NEXT_PUBLIC_APP_URL=https://dev.laslogtmx.com`
    - `NEXT_PUBLIC_WEB_APP_URL=https://dev.laslogtmx.com`
-4. Deploy; staging uses the same Supabase project (add `dev.laslogtmx.com` to Supabase Auth redirect URLs)
+   - `NEXT_PUBLIC_MARKETING_URL=https://dev.laslogtmx.com`
+4. Deploy from `develop`; add `dev.laslogtmx.com` (and `*.dev.laslogtmx.com` if needed) to Supabase Authentication → URL Configuration → Redirect URLs.
 
-Checkpoint: [`.agents/checkpoints/cloudflare-setup.json`](.agents/checkpoints/cloudflare-setup.json)
+**Local dev**:
+- `npm run dev:marketing`
+- `npm run dev:web`
+
+Checkpoint: [`.agents/checkpoints/cloudflare-setup.json`](.agents/checkpoints/cloudflare-setup.json) | [`.agents/checkpoints/cloudflare-pages-structure.json`](.agents/checkpoints/cloudflare-pages-structure.json)
 
 ## Key Features
 - Military Time default

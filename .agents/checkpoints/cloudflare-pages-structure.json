@@ -1,0 +1,76 @@
+{
+  "checkpoint": "cloudflare-pages-multi-project",
+  "version": "2026-06-24",
+  "status": "complete",
+  "backup_branch": "backup-before-cloudflare-pages-structure",
+  "structure": {
+    "marketing": {
+      "path": "apps/marketing",
+      "purpose": "laslogtmx.com - marketing / landing site",
+      "framework": "Next.js (static export for CF Pages)",
+      "production_branch": "main",
+      "cf_pages_project": "laslogtmx-marketing",
+      "root_directory_in_cf": "apps/marketing",
+      "build_command": "npm run build:marketing",
+      "build_output": "out"
+    },
+    "web": {
+      "path": "apps/web",
+      "purpose": "app.laslogtmx.com - full TMS web app",
+      "framework": "Next.js (full, with API/middleware)",
+      "production_branch": "main",
+      "cf_pages_project": "laslogtmx-web",
+      "root_directory_in_cf": "apps/web",
+      "build_command": "npm run build:web",
+      "build_output": ".vercel/output/static"
+    }
+  },
+  "domains": {
+    "marketing": "laslogtmx.com",
+    "app": "app.laslogtmx.com",
+    "staging": "dev.laslogtmx.com",
+    "staging_branch": "develop"
+  },
+  "deployment": {
+    "production": {
+      "branch": "main",
+      "marketing_project_root": "apps/marketing",
+      "web_project_root": "apps/web"
+    },
+    "staging": {
+      "branch": "develop",
+      "note": "Configure preview or separate staging project in CF Pages. Set NEXT_PUBLIC_*_URL overrides on the branch for both marketing and web. Add domains to Supabase auth allowlist."
+    }
+  },
+  "files": {
+    "marketing_configs": [
+      "package.json",
+      "next.config.js",
+      "wrangler.toml",
+      "tsconfig.json",
+      "app/layout.tsx",
+      "app/page.tsx",
+      "app/globals.css"
+    ],
+    "docs_updated": [
+      "README.md",
+      "skills/webbuildSKILL.md",
+      ".env.example",
+      "turbo.json",
+      "package.json"
+    ],
+    "checkpoint": ".agents/checkpoints/cloudflare-pages-structure.json"
+  },
+  "next_steps": [
+    "Create laslogtmx-marketing and laslogtmx-web CF Pages projects via dashboard following exact steps in README.md",
+    "Point custom domains laslogtmx.com and app.laslogtmx.com",
+    "Configure develop branch for dev.laslogtmx.com",
+    "Set env vars via CF dashboard (never commit real keys)",
+    "Test `npm run build:marketing` and `npm run build:web` locally"
+  ],
+  "verification": {
+    "folder_structure": "apps/marketing + apps/web",
+    "production_branch_main": true,
+    "root_dirs_configured": true
+  }
+}
