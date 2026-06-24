@@ -2,7 +2,7 @@
   "checkpoint": "cloudflare-pages-multi-project",
   "version": "2026-06-24",
   "status": "complete",
-  "backup_branch": "backup-before-wrangler-config",
+  "backup_branch": "backup-before-marketing-build-config",
   "structure": {
     "marketing": {
       "path": "apps/marketing",
@@ -12,6 +12,8 @@
       "cf_pages_project": "laslogtmx-marketing",
       "root_directory_in_cf": "apps/marketing",
       "build_command": "npm run build:marketing",
+      "build_script": "next build",
+      "build_note": "Next.js 15 removed next export; output: export in next.config.js writes to out/",
       "build_output": "out",
       "wrangler_config": "apps/marketing/wrangler.jsonc"
     },
@@ -93,6 +95,9 @@
     "wrangler_jsonc_created": true,
     "wrangler_toml_removed": true,
     "gitignore_updated": true,
-    "backup_branch": "backup-before-wrangler-config"
+    "backup_branch": "backup-before-marketing-build-config",
+    "build_marketing_script_added": true,
+    "build_marketing_local_pass": true,
+    "build_output_dir": "apps/marketing/out"
   }
 }
