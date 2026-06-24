@@ -2,7 +2,7 @@
   "checkpoint": "cloudflare-pages-multi-project",
   "version": "2026-06-24",
   "status": "complete",
-  "backup_branch": "backup-before-cloudflare-pages-structure",
+  "backup_branch": "backup-before-wrangler-config",
   "structure": {
     "marketing": {
       "path": "apps/marketing",
@@ -12,18 +12,40 @@
       "cf_pages_project": "laslogtmx-marketing",
       "root_directory_in_cf": "apps/marketing",
       "build_command": "npm run build:marketing",
-      "build_output": "out"
+      "build_output": "out",
+      "wrangler_config": "apps/marketing/wrangler.jsonc"
     },
     "web": {
       "path": "apps/web",
       "purpose": "app.laslogtmx.com - full TMS web app",
-      "framework": "Next.js (full, with API/middleware)",
+      "framework": "Next.js (OpenNext Cloudflare adapter)",
       "production_branch": "main",
       "cf_pages_project": "laslogtmx-web",
       "root_directory_in_cf": "apps/web",
       "build_command": "npm run build:web",
-      "build_output": ".vercel/output/static"
+      "build_output": ".open-next/assets",
+      "worker_entry": ".open-next/worker.js",
+      "wrangler_config": "apps/web/wrangler.jsonc"
     }
+  },
+  "wrangler": {
+    "format": "jsonc",
+    "marketing": {
+      "name": "laslogtmx-marketing",
+      "compatibility_date": "2026-06-21",
+      "pages_build_output_dir": "./out",
+      "assets_directory": "./out",
+      "main": null
+    },
+    "web": {
+      "name": "laslogtmx-web",
+      "compatibility_date": "2026-06-21",
+      "compatibility_flags": ["nodejs_compat"],
+      "pages_build_output_dir": ".open-next/assets",
+      "assets_directory": ".open-next/assets",
+      "main": ".open-next/worker.js"
+    },
+    "replaced": ["apps/marketing/wrangler.toml", "apps/web/wrangler.toml"]
   },
   "domains": {
     "marketing": "laslogtmx.com",
@@ -35,7 +57,8 @@
     "production": {
       "branch": "main",
       "marketing_project_root": "apps/marketing",
-      "web_project_root": "apps/web"
+      "web_project_root": "apps/web",
+      "use_wrangler_config_as_source_of_truth": true
     },
     "staging": {
       "branch": "develop",
@@ -46,31 +69,30 @@
     "marketing_configs": [
       "package.json",
       "next.config.js",
-      "wrangler.toml",
+      "wrangler.jsonc",
       "tsconfig.json",
       "app/layout.tsx",
       "app/page.tsx",
       "app/globals.css"
     ],
-    "docs_updated": [
-      "README.md",
-      "skills/webbuildSKILL.md",
-      ".env.example",
-      "turbo.json",
-      "package.json"
+    "web_configs": [
+      "wrangler.jsonc"
     ],
+    "gitignore_added": [".open-next/", ".vercel/"],
     "checkpoint": ".agents/checkpoints/cloudflare-pages-structure.json"
   },
   "next_steps": [
-    "Create laslogtmx-marketing and laslogtmx-web CF Pages projects via dashboard following exact steps in README.md",
+    "Install @opennextjs/cloudflare in apps/web and wire build:web to opennextjs-cloudflare build",
+    "Create laslogtmx-marketing and laslogtmx-web CF Pages projects via dashboard",
+    "Enable V2 build system and opt-in to Wrangler configuration file as source of truth",
     "Point custom domains laslogtmx.com and app.laslogtmx.com",
     "Configure develop branch for dev.laslogtmx.com",
-    "Set env vars via CF dashboard (never commit real keys)",
-    "Test `npm run build:marketing` and `npm run build:web` locally"
+    "Set env vars via CF dashboard (never commit real keys)"
   ],
   "verification": {
-    "folder_structure": "apps/marketing + apps/web",
-    "production_branch_main": true,
-    "root_dirs_configured": true
+    "wrangler_jsonc_created": true,
+    "wrangler_toml_removed": true,
+    "gitignore_updated": true,
+    "backup_branch": "backup-before-wrangler-config"
   }
 }

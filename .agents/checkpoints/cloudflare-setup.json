@@ -22,7 +22,7 @@
     "manifest": "infra/cloudflare/rules-manifest.json",
     "headers": "apps/web/public/_headers",
     "redirects": "apps/web/public/_redirects",
-    "wrangler": "apps/web/wrangler.toml",
+    "wrangler": "apps/web/wrangler.jsonc",
     "constants": "packages/shared/src/constants/index.ts"
   },
   "staging": {
