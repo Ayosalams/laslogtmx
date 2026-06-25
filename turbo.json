@@ -15,6 +15,15 @@
         ".open-next/**"
       ]
     },
+    "build:web": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".next/**",
+        ".open-next/**"
+      ]
+    },
     "build:marketing": {
       "dependsOn": [
         "^build"
@@ -25,6 +34,10 @@
       ]
     },
     "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "dev:web": {
       "cache": false,
       "persistent": true
     },

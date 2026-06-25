@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "opennextjs-cloudflare build",
+    "dev": "npm run dev:web --prefix ../..",
+    "dev:web": "next dev",
+    "build": "npm run build:web --prefix ../..",
+    "build:web": "opennextjs-cloudflare build",
     "start": "next start",
     "lint": "next lint"
   },

@@ -8,10 +8,10 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:web": "turbo run dev --filter=web",
+    "dev:web": "turbo run dev:web --filter=web",
     "dev:mobile": "turbo run start --filter=mobile",
     "dev:marketing": "turbo run dev:marketing --filter=marketing",
-    "build:web": "turbo run build --filter=web",
+    "build:web": "turbo run build:web --filter=web",
     "build:mobile": "turbo run build --filter=mobile",
     "build:marketing": "turbo run build:marketing --filter=marketing",
     "lint": "turbo run lint",

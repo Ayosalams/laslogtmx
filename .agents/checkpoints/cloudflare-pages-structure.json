@@ -2,7 +2,7 @@
   "checkpoint": "cloudflare-pages-multi-project",
   "version": "2026-06-24",
   "status": "complete",
-  "backup_branch": "backup-before-build-web-script-fix",
+  "backup_branch": "backup-before-cf-apps-web-scripts-fix",
   "structure": {
     "marketing": {
       "path": "apps/marketing",
@@ -23,10 +23,14 @@
       "framework": "Next.js (OpenNext Cloudflare adapter)",
       "production_branch": "main",
       "cf_pages_project": "laslogtmx-app",
-      "root_directory_in_cf": "/",
-      "root_directory_note": "Must be monorepo root — build:web is defined in root package.json only",
-      "build_command": "npm run build:web",
+      "root_directory_in_cf": "apps/web",
+      "root_directory_alt": "/",
+      "root_directory_note": "apps/web root: use npm run build or npm run build:web (both defined locally). Monorepo root / also works with npm run build:web.",
+      "build_command": "npm run build",
+      "build_command_alt": "npm run build:web",
+      "install_command_apps_web": "cd ../.. && npm ci",
       "build_script": "opennextjs-cloudflare build",
+      "build_delegate_script": "npm run build:web --prefix ../..",
       "build_output": "apps/web/.open-next/assets",
       "build_output_wrangler_relative": ".open-next/assets",
       "worker_entry": "apps/web/.open-next/worker.js",
@@ -39,9 +43,15 @@
       }
     }
   },
+  "apps_web_scripts": {
+    "build": "npm run build:web --prefix ../..",
+    "dev": "npm run dev:web --prefix ../..",
+    "build:web": "opennextjs-cloudflare build",
+    "dev:web": "next dev"
+  },
   "root_scripts": {
-    "build:web": "turbo run build --filter=web",
-    "dev:web": "turbo run dev --filter=web",
+    "build:web": "turbo run build:web --filter=web",
+    "dev:web": "turbo run dev:web --filter=web",
     "build:marketing": "turbo run build:marketing --filter=marketing",
     "dev:marketing": "turbo run dev:marketing --filter=marketing"
   },
@@ -49,6 +59,14 @@
     "build_task": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "out/**", "dist/**", ".open-next/**"]
+    },
+    "build_web_task": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", ".open-next/**"]
+    },
+    "dev_web_task": {
+      "cache": false,
+      "persistent": true
     }
   },
   "wrangler": {
@@ -80,7 +98,8 @@
     "production": {
       "branch": "main",
       "marketing_project_root": "apps/marketing",
-      "web_project_root": "/",
+      "web_project_root": "apps/web",
+      "web_project_root_alt": "/",
       "use_wrangler_config_as_source_of_truth": true,
       "wrangler_config_path": "apps/web/wrangler.jsonc"
     },
@@ -108,8 +127,26 @@
     "gitignore_added": [".open-next/", ".vercel/"],
     "checkpoint": ".agents/checkpoints/cloudflare-pages-structure.json"
   },
+  "cf_pages_laslogtmx_app": {
+    "project": "laslogtmx-app",
+    "production_branch": "main",
+    "nodejs_version": "20",
+    "framework_preset": "None",
+    "option_a_apps_web_root": {
+      "root_directory": "apps/web",
+      "build_command": "npm run build",
+      "build_output_directory": ".open-next/assets",
+      "install_command": "cd ../.. && npm ci"
+    },
+    "option_b_monorepo_root": {
+      "root_directory": "/",
+      "build_command": "npm run build:web",
+      "build_output_directory": "apps/web/.open-next/assets",
+      "install_command": "npm ci"
+    }
+  },
   "next_steps": [
-    "Apply laslogtmx-app CF Pages settings (root=/, build:web) in dashboard",
+    "Apply laslogtmx-app CF Pages settings (apps/web or / root — see cf_pages_laslogtmx_app)",
     "Point custom domain app.laslogtmx.com to laslogtmx-app",
     "Configure develop branch for dev.laslogtmx.com",
     "Set env vars via CF dashboard (never commit real keys)"
@@ -118,9 +155,12 @@
     "wrangler_jsonc_created": true,
     "wrangler_toml_removed": true,
     "gitignore_updated": true,
-    "backup_branch": "backup-before-build-web-script-fix",
+    "backup_branch": "backup-before-cf-apps-web-scripts-fix",
     "build_web_script_root": true,
+    "build_web_script_apps_web": true,
     "dev_web_script_root": true,
+    "dev_web_script_apps_web": true,
+    "build_delegate_no_recursion": true,
     "build_web_local_pass": true,
     "build_web_local_date": "2026-06-24",
     "build_web_adapter": "opennextjs-cloudflare",
