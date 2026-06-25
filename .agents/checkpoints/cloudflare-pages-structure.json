@@ -2,7 +2,7 @@
   "checkpoint": "cloudflare-pages-multi-project",
   "version": "2026-06-24",
   "status": "complete",
-  "backup_branch": "backup-before-marketing-build-config",
+  "backup_branch": "backup-before-build-web-script-fix",
   "structure": {
     "marketing": {
       "path": "apps/marketing",
@@ -13,7 +13,7 @@
       "root_directory_in_cf": "apps/marketing",
       "build_command": "npm run build:marketing",
       "build_script": "next build",
-      "build_note": "Next.js 15 removed next export; output: export in next.config.js writes to out/",
+      "build_note": "build:marketing exists in apps/marketing/package.json; root turbo script optional",
       "build_output": "out",
       "wrangler_config": "apps/marketing/wrangler.jsonc"
     },
@@ -22,12 +22,33 @@
       "purpose": "app.laslogtmx.com - full TMS web app",
       "framework": "Next.js (OpenNext Cloudflare adapter)",
       "production_branch": "main",
-      "cf_pages_project": "laslogtmx-web",
-      "root_directory_in_cf": "apps/web",
+      "cf_pages_project": "laslogtmx-app",
+      "root_directory_in_cf": "/",
+      "root_directory_note": "Must be monorepo root — build:web is defined in root package.json only",
       "build_command": "npm run build:web",
-      "build_output": ".open-next/assets",
-      "worker_entry": ".open-next/worker.js",
-      "wrangler_config": "apps/web/wrangler.jsonc"
+      "build_script": "opennextjs-cloudflare build",
+      "build_output": "apps/web/.open-next/assets",
+      "build_output_wrangler_relative": ".open-next/assets",
+      "worker_entry": "apps/web/.open-next/worker.js",
+      "worker_entry_wrangler_relative": ".open-next/worker.js",
+      "wrangler_config": "apps/web/wrangler.jsonc",
+      "nodejs_version": "20",
+      "build_watch_paths": {
+        "include": ["apps/web/**", "packages/**", "features/**"],
+        "exclude": ["apps/marketing/**", "apps/mobile/**"]
+      }
+    }
+  },
+  "root_scripts": {
+    "build:web": "turbo run build --filter=web",
+    "dev:web": "turbo run dev --filter=web",
+    "build:marketing": "turbo run build:marketing --filter=marketing",
+    "dev:marketing": "turbo run dev:marketing --filter=marketing"
+  },
+  "turbo": {
+    "build_task": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "out/**", "dist/**", ".open-next/**"]
     }
   },
   "wrangler": {
@@ -40,8 +61,8 @@
       "main": null
     },
     "web": {
-      "name": "laslogtmx-web",
-      "compatibility_date": "2026-06-21",
+      "name": "laslogtmx-app",
+      "compatibility_date": "2026-06-24",
       "compatibility_flags": ["nodejs_compat"],
       "pages_build_output_dir": ".open-next/assets",
       "assets_directory": ".open-next/assets",
@@ -59,8 +80,9 @@
     "production": {
       "branch": "main",
       "marketing_project_root": "apps/marketing",
-      "web_project_root": "apps/web",
-      "use_wrangler_config_as_source_of_truth": true
+      "web_project_root": "/",
+      "use_wrangler_config_as_source_of_truth": true,
+      "wrangler_config_path": "apps/web/wrangler.jsonc"
     },
     "staging": {
       "branch": "develop",
@@ -68,6 +90,7 @@
     }
   },
   "files": {
+    "root_configs": ["package.json", "turbo.json"],
     "marketing_configs": [
       "package.json",
       "next.config.js",
@@ -78,16 +101,16 @@
       "app/globals.css"
     ],
     "web_configs": [
+      "package.json",
+      "open-next.config.ts",
       "wrangler.jsonc"
     ],
     "gitignore_added": [".open-next/", ".vercel/"],
     "checkpoint": ".agents/checkpoints/cloudflare-pages-structure.json"
   },
   "next_steps": [
-    "Install @opennextjs/cloudflare in apps/web and wire build:web to opennextjs-cloudflare build",
-    "Create laslogtmx-marketing and laslogtmx-web CF Pages projects via dashboard",
-    "Enable V2 build system and opt-in to Wrangler configuration file as source of truth",
-    "Point custom domains laslogtmx.com and app.laslogtmx.com",
+    "Apply laslogtmx-app CF Pages settings (root=/, build:web) in dashboard",
+    "Point custom domain app.laslogtmx.com to laslogtmx-app",
     "Configure develop branch for dev.laslogtmx.com",
     "Set env vars via CF dashboard (never commit real keys)"
   ],
@@ -95,9 +118,16 @@
     "wrangler_jsonc_created": true,
     "wrangler_toml_removed": true,
     "gitignore_updated": true,
-    "backup_branch": "backup-before-marketing-build-config",
+    "backup_branch": "backup-before-build-web-script-fix",
+    "build_web_script_root": true,
+    "dev_web_script_root": true,
+    "build_web_local_pass": true,
+    "build_web_local_date": "2026-06-24",
+    "build_web_adapter": "opennextjs-cloudflare",
+    "build_web_output_dir": "apps/web/.open-next",
+    "turbo_open_next_outputs": true,
     "build_marketing_script_added": true,
     "build_marketing_local_pass": true,
-    "build_output_dir": "apps/marketing/out"
+    "build_marketing_output_dir": "apps/marketing/out"
   }
 }
