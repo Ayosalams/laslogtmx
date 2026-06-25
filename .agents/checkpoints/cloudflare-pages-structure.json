@@ -2,7 +2,7 @@
   "checkpoint": "cloudflare-pages-multi-project",
   "version": "2026-06-24",
   "status": "complete",
-  "backup_branch": "backup-before-cf-apps-web-scripts-fix",
+  "backup_branch": "backup-before-cf-build-supabase-fix",
   "structure": {
     "marketing": {
       "path": "apps/marketing",
@@ -30,7 +30,7 @@
       "build_command_alt": "npm run build:web",
       "install_command_apps_web": "cd ../.. && npm ci",
       "build_script": "opennextjs-cloudflare build",
-      "build_delegate_script": "npm run build:web --prefix ../..",
+      "build_delegate_script": "npm run build:web",
       "build_output": "apps/web/.open-next/assets",
       "build_output_wrangler_relative": ".open-next/assets",
       "worker_entry": "apps/web/.open-next/worker.js",
@@ -44,7 +44,7 @@
     }
   },
   "apps_web_scripts": {
-    "build": "npm run build:web --prefix ../..",
+    "build": "npm run build:web",
     "dev": "npm run dev:web --prefix ../..",
     "build:web": "opennextjs-cloudflare build",
     "dev:web": "next dev"
@@ -132,9 +132,11 @@
     "production_branch": "main",
     "nodejs_version": "20",
     "framework_preset": "None",
+    "recommended": "option_a_apps_web_root",
     "option_a_apps_web_root": {
       "root_directory": "apps/web",
-      "build_command": "npm run build",
+      "build_command": "npm run build:web",
+      "build_command_alt": "npm run build",
       "build_output_directory": ".open-next/assets",
       "install_command": "cd ../.. && npm ci"
     },
@@ -143,26 +145,55 @@
       "build_command": "npm run build:web",
       "build_output_directory": "apps/web/.open-next/assets",
       "install_command": "npm ci"
+    },
+    "environment_variables": {
+      "required_at_build_time": [
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+      ],
+      "recommended": [
+        "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_WEB_APP_URL",
+        "NEXT_PUBLIC_SENTRY_DSN"
+      ],
+      "server_runtime_only": [
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "VAPID_PRIVATE_KEY",
+        "PUSH_WEBHOOK_SECRET"
+      ],
+      "note": "Build succeeds without Supabase vars (SSG placeholders in lib/supabase.ts) but auth will not work until real NEXT_PUBLIC_* values are set in CF Pages env and redeployed."
     }
   },
+  "supabase_build": {
+    "file": "lib/supabase.ts",
+    "ssg_tolerant": true,
+    "placeholder_detection": true,
+    "auth_disabled_during_build": true,
+    "build_warning": "[supabase] Build proceeding without real Supabase config (SSG-safe placeholders)."
+  },
   "next_steps": [
-    "Apply laslogtmx-app CF Pages settings (apps/web or / root — see cf_pages_laslogtmx_app)",
+    "Apply laslogtmx-app CF Pages settings (option_a recommended — see cf_pages_laslogtmx_app)",
+    "Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in CF Pages env, then redeploy",
     "Point custom domain app.laslogtmx.com to laslogtmx-app",
-    "Configure develop branch for dev.laslogtmx.com",
-    "Set env vars via CF dashboard (never commit real keys)"
+    "Configure develop branch for dev.laslogtmx.com"
   ],
   "verification": {
     "wrangler_jsonc_created": true,
     "wrangler_toml_removed": true,
     "gitignore_updated": true,
-    "backup_branch": "backup-before-cf-apps-web-scripts-fix",
+    "backup_branch": "backup-before-cf-build-supabase-fix",
     "build_web_script_root": true,
     "build_web_script_apps_web": true,
     "dev_web_script_root": true,
     "dev_web_script_apps_web": true,
     "build_delegate_no_recursion": true,
     "build_web_local_pass": true,
+    "build_web_local_pass_placeholder_env": true,
     "build_web_local_date": "2026-06-24",
+    "supabase_ssg_tolerant": true,
+    "supabase_build_warning": true,
     "build_web_adapter": "opennextjs-cloudflare",
     "build_web_output_dir": "apps/web/.open-next",
     "turbo_open_next_outputs": true,
