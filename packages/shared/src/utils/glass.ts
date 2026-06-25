@@ -6,7 +6,7 @@
  * Military time and shared components unchanged.
  */
 
-import { ViewStyle } from 'react-native';
+type ViewStyle = Record<string, unknown>;
 
 // Web: Tailwind class strings (compose with your elements)
 export const GLASS = {

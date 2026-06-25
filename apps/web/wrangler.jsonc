@@ -9,10 +9,6 @@
   //   npx opennextjs-cloudflare build   (produces .open-next/)
   "main": ".open-next/worker.js",
   "pages_build_output_dir": ".open-next/assets",
-  "assets": {
-    "directory": ".open-next/assets",
-    "binding": "ASSETS"
-  },
   // Self-reference for advanced OpenNext (e.g. server actions, revalidations). Update name if needed.
   "services": [
     {

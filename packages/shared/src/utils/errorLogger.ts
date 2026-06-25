@@ -19,17 +19,10 @@ export async function initSentry(dsn?: string) {
   if (!dsn || sentryInitialized) {
     return;
   }
-  const isLikelyRN = typeof navigator !== 'undefined' && (navigator as any).product === 'ReactNative';
   try {
-    if (isLikelyRN) {
-      // Dynamic import for RN only - prevents web build from including RN native modules
-      Sentry = await import(/* webpackIgnore: true */ '@sentry/react-native').catch(() => null);
-    } else {
-      // Web / Next client only
-      Sentry = await import('@sentry/react').catch(async () => {
-        try { return await import('@sentry/browser'); } catch { return null; }
-      });
-    }
+    Sentry = await import('@sentry/react').catch(async () => {
+      try { return await import('@sentry/browser'); } catch { return null; }
+    });
     if (Sentry && (Sentry.init || (Sentry.default && Sentry.default.init))) {
       const S = Sentry.init ? Sentry : Sentry.default;
       S.init({

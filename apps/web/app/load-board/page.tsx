@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useLoadBoard } from "../../../../features/load-board/hooks/useLoadBoard";
 import { useLoadMatchNotifications } from "../../../../features/load-board/hooks/useLoadMatchNotifications";
 import { useMatchedLoads } from "../../../../features/load-board/hooks/useMatchedLoads";
-import { LoadMatchBadgeWeb } from "../../../../features/load-board/components/LoadMatchBadge";
+import { LoadMatchBadgeWeb } from "../../../../features/load-board/components/LoadMatchBadgeWeb";
 import { EQUIPMENT_TYPES, VERIFIED_BADGE_LABEL } from "../../../../features/load-board/constants";
 import { formatRateCents, parseRateToCents } from "../../../../features/load-board/utils/formatRate";
 import { useCurrentTime } from "../../../../packages/shared/src/hooks/useCurrentTime";
