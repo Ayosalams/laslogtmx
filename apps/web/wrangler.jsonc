@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "laslogtmx-app",
+  "name": "laslogtmx-web",
   "compatibility_date": "2026-06-24",
   "compatibility_flags": ["nodejs_compat"],
   // Proper Cloudflare Pages + Next.js 15 config for full app (SSR, API routes, middleware, dynamic routes)
@@ -13,7 +13,7 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "laslogtmx-app"
+      "service": "laslogtmx-web"
     }
   ],
   "env": {
@@ -21,11 +21,11 @@
       "name": "laslogtmx-app"
     },
     "preview": {
-      "name": "laslogtmx-app-staging"
+      "name": "laslogtmx-dev"
     }
   }
   // RECOMMENDED Cloudflare Build watch paths (for monorepo to avoid unnecessary builds):
-  // In CF dashboard: laslogtmx-app project -> Settings -> Build -> Build watch paths
+  // In CF dashboard: laslogtmx-app (main) / laslogtmx-dev (develop) project -> Settings -> Build -> Build watch paths
   //   Include paths: apps/web/*
   //   Exclude paths: (empty, or e.g. apps/marketing/*, packages/*, features/* if desired)
   // This ensures only changes under apps/web trigger deploys for this Pages project.
