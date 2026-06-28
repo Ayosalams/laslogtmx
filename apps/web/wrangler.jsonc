@@ -18,10 +18,22 @@
   ],
   "env": {
     "production": {
-      "name": "laslogtmx-app"
+      "name": "laslogtmx-app",
+      "services": [
+        {
+          "binding": "WORKER_SELF_REFERENCE",
+          "service": "laslogtmx-app"
+        }
+      ]
     },
     "preview": {
-      "name": "laslogtmx-dev"
+      "name": "laslogtmx-dev",
+      "services": [
+        {
+          "binding": "WORKER_SELF_REFERENCE",
+          "service": "laslogtmx-dev"
+        }
+      ]
     }
   }
   // RECOMMENDED Cloudflare Build watch paths (for monorepo to avoid unnecessary builds):
