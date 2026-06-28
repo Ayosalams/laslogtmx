@@ -1,44 +1,23 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "laslogtmx-web",
-  "compatibility_date": "2026-06-24",
-  "compatibility_flags": ["nodejs_compat"],
-  // Proper Cloudflare Pages + Next.js 15 config for full app (SSR, API routes, middleware, dynamic routes)
-  // Uses OpenNext adapter output for active routes + static assets.
-  // Build with opennextjs-cloudflare (after `npm i -D @opennextjs/cloudflare` in apps/web or root):
-  //   npx opennextjs-cloudflare build   (produces .open-next/)
-  "main": ".open-next/worker.js",
-  "pages_build_output_dir": ".open-next/assets",
-  // Self-reference for advanced OpenNext (e.g. server actions, revalidations). Update name if needed.
-  "services": [
-    {
-      "binding": "WORKER_SELF_REFERENCE",
-      "service": "laslogtmx-web"
-    }
+  "name": "laslogtmx-web", // Neutral name — works for both prod + dev
+  "main": "./src/index.ts",
+  "compatibility_date": "2026-06-27",
+  "compatibility_flags": [
+    "nodejs_compat"
   ],
-  "env": {
-    "production": {
-      "name": "laslogtmx-app",
-      "services": [
-        {
-          "binding": "WORKER_SELF_REFERENCE",
-          "service": "laslogtmx-app"
-        }
-      ]
-    },
-    "preview": {
-      "name": "laslogtmx-dev",
-      "services": [
-        {
-          "binding": "WORKER_SELF_REFERENCE",
-          "service": "laslogtmx-dev"
-        }
-      ]
-    }
+  "assets": {
+    "directory": "./dist/client", // Adjust if your OpenNext output differs
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/api/*",
+      "/auth/*",
+      "/loads/*",
+      "/expenses/*"
+    ]
+  },
+  "preview_urls": true,
+  "observability": {
+    "enabled": true
   }
-  // RECOMMENDED Cloudflare Build watch paths (for monorepo to avoid unnecessary builds):
-  // In CF dashboard: laslogtmx-app (main) / laslogtmx-dev (develop) project -> Settings -> Build -> Build watch paths
-  //   Include paths: apps/web/*
-  //   Exclude paths: (empty, or e.g. apps/marketing/*, packages/*, features/* if desired)
-  // This ensures only changes under apps/web trigger deploys for this Pages project.
 }
