@@ -20,7 +20,7 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "laslogtmx-web"
+      "service": "laslogtmx-app"
     }
   ],
   "preview_urls": true,
