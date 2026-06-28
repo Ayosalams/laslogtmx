@@ -1,0 +1,35 @@
+{
+  "checkpoint": "staging-develop-setup",
+  "version": "2026-06-24",
+  "status": "complete",
+  "backup_branch": "backup-before-wrangler-and-develop",
+  "staging_branch": "develop",
+  "cloudflare": {
+    "project": "laslogtmx-dev",
+    "hostname": "dev.laslogtmx.com",
+    "root_directory": "/",
+    "production_branch": "develop",
+    "build_command": "npm run build:web",
+    "build_output_directory": "apps/web/.open-next/assets",
+    "nodejs_version": "20",
+    "wrangler_config": "apps/web/wrangler.jsonc"
+  },
+  "supabase": {
+    "seed_file": "supabase/seed.staging.sql",
+    "note": "Use a separate Supabase staging project. Never run seed.staging.sql on production."
+  },
+  "files": {
+    "created": [
+      "supabase/seed.staging.sql",
+      "infra/staging/laslogtmx-dev.env.example",
+      "infra/staging/README.md",
+      ".agents/checkpoints/staging-setup.json"
+    ],
+    "updated": [
+      ".env.example",
+      "README.md",
+      "skills/webbuildSKILL.md",
+      "infra/cloudflare/rules-manifest.json"
+    ]
+  }
+}

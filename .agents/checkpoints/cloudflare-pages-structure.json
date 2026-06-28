@@ -1,8 +1,8 @@
 {
   "checkpoint": "cloudflare-pages-multi-project",
-  "version": "2026-06-24",
+  "version": "2026-06-27",
   "status": "complete",
-  "backup_branch": "backup-before-cf-build-supabase-fix",
+  "backup_branch": "backup-before-wrangler-and-develop",
   "structure": {
     "marketing": {
       "path": "apps/marketing",
@@ -73,18 +73,24 @@
     "format": "jsonc",
     "marketing": {
       "name": "laslogtmx-marketing",
-      "compatibility_date": "2026-06-21",
+      "compatibility_date": "2026-06-27",
       "pages_build_output_dir": "./out",
       "assets_directory": "./out",
+      "assets_not_found_handling": "404-page",
       "main": null
     },
     "web": {
-      "name": "laslogtmx-app",
-      "compatibility_date": "2026-06-24",
+      "name": "laslogtmx-web",
+      "compatibility_date": "2026-06-27",
       "compatibility_flags": ["nodejs_compat"],
       "pages_build_output_dir": ".open-next/assets",
       "assets_directory": ".open-next/assets",
-      "main": ".open-next/worker.js"
+      "assets_binding": "ASSETS",
+      "assets_not_found_handling": "single-page-application",
+      "run_worker_first": ["/api/*", "/auth/*", "/loads/*", "/expenses/*"],
+      "main": ".open-next/worker.js",
+      "env_production_name": "laslogtmx-app",
+      "env_preview_name": "laslogtmx-dev"
     },
     "replaced": ["apps/marketing/wrangler.toml", "apps/web/wrangler.toml"]
   },
@@ -105,7 +111,12 @@
     },
     "staging": {
       "branch": "develop",
-      "note": "Configure preview or separate staging project in CF Pages. Set NEXT_PUBLIC_*_URL overrides on the branch for both marketing and web. Add domains to Supabase auth allowlist."
+      "cf_pages_project": "laslogtmx-dev",
+      "root_directory": "/",
+      "build_output_directory": "apps/web/.open-next/assets",
+      "env_example": "infra/staging/laslogtmx-dev.env.example",
+      "seed_file": "supabase/seed.staging.sql",
+      "checkpoint": ".agents/checkpoints/staging-setup.json"
     }
   },
   "files": {
@@ -173,17 +184,37 @@
     "auth_disabled_during_build": true,
     "build_warning": "[supabase] Build proceeding without real Supabase config (SSG-safe placeholders)."
   },
+  "cf_pages_laslogtmx_marketing": {
+    "project": "laslogtmx-marketing",
+    "production_branch": "main",
+    "root_directory": "apps/marketing",
+    "build_command": "npm run build:marketing",
+    "build_output_directory": "out",
+    "framework_preset": "Next.js",
+    "custom_domain": "laslogtmx.com"
+  },
+  "cf_pages_laslogtmx_dev": {
+    "project": "laslogtmx-dev",
+    "production_branch": "develop",
+    "root_directory": "/",
+    "build_command": "npm run build:web",
+    "build_output_directory": "apps/web/.open-next/assets",
+    "nodejs_version": "20",
+    "framework_preset": "None",
+    "custom_domain": "dev.laslogtmx.com",
+    "env_source": "infra/staging/laslogtmx-dev.env.example"
+  },
   "next_steps": [
     "Apply laslogtmx-app CF Pages settings (option_a recommended — see cf_pages_laslogtmx_app)",
+    "Apply laslogtmx-marketing and laslogtmx-dev CF Pages settings (see cf_pages_laslogtmx_marketing / cf_pages_laslogtmx_dev)",
     "Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in CF Pages env, then redeploy",
-    "Point custom domain app.laslogtmx.com to laslogtmx-app",
-    "Configure develop branch for dev.laslogtmx.com"
+    "Point custom domains: laslogtmx.com, app.laslogtmx.com, dev.laslogtmx.com"
   ],
   "verification": {
     "wrangler_jsonc_created": true,
     "wrangler_toml_removed": true,
     "gitignore_updated": true,
-    "backup_branch": "backup-before-cf-build-supabase-fix",
+    "backup_branch": "backup-before-wrangler-and-develop",
     "build_web_script_root": true,
     "build_web_script_apps_web": true,
     "dev_web_script_root": true,

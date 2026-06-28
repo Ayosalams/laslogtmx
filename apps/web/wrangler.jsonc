@@ -1,13 +1,14 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "laslogtmx-web", // Neutral name — works for both prod + dev
-  "main": "./src/index.ts",
+  "name": "laslogtmx-web",
   "compatibility_date": "2026-06-27",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
+  "compatibility_flags": ["nodejs_compat"],
+  // OpenNext Cloudflare adapter output (npm run build:web → .open-next/)
+  "main": ".open-next/worker.js",
+  "pages_build_output_dir": ".open-next/assets",
   "assets": {
-    "directory": "./dist/client", // Adjust if your OpenNext output differs
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
     "not_found_handling": "single-page-application",
     "run_worker_first": [
       "/api/*",
@@ -16,8 +17,35 @@
       "/expenses/*"
     ]
   },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "laslogtmx-web"
+    }
+  ],
   "preview_urls": true,
   "observability": {
     "enabled": true
+  },
+  // Per-environment CF Pages project names (wrangler name stays neutral)
+  "env": {
+    "production": {
+      "name": "laslogtmx-app",
+      "services": [
+        {
+          "binding": "WORKER_SELF_REFERENCE",
+          "service": "laslogtmx-app"
+        }
+      ]
+    },
+    "preview": {
+      "name": "laslogtmx-dev",
+      "services": [
+        {
+          "binding": "WORKER_SELF_REFERENCE",
+          "service": "laslogtmx-dev"
+        }
+      ]
+    }
   }
 }

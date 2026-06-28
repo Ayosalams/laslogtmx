@@ -1,0 +1,82 @@
+{
+  "checkpoint": "wrangler-develop-setup",
+  "version": "2026-06-27",
+  "status": "complete",
+  "backup_branch": "backup-before-wrangler-and-develop",
+  "filesystem_backup": "../Backups/laslogtmx_20260627_2146",
+  "wrangler": {
+    "marketing": {
+      "path": "apps/marketing/wrangler.jsonc",
+      "name": "laslogtmx-marketing",
+      "type": "static_export",
+      "pages_build_output_dir": "./out",
+      "assets": {
+        "directory": "./out",
+        "not_found_handling": "404-page"
+      }
+    },
+    "web": {
+      "path": "apps/web/wrangler.jsonc",
+      "name": "laslogtmx-web",
+      "type": "opennext_cloudflare",
+      "main": ".open-next/worker.js",
+      "pages_build_output_dir": ".open-next/assets",
+      "compatibility_flags": ["nodejs_compat"],
+      "assets": {
+        "directory": ".open-next/assets",
+        "binding": "ASSETS",
+        "not_found_handling": "single-page-application",
+        "run_worker_first": ["/api/*", "/auth/*", "/loads/*", "/expenses/*"]
+      },
+      "env": {
+        "production": { "cf_project": "laslogtmx-app", "domain": "app.laslogtmx.com" },
+        "preview": { "cf_project": "laslogtmx-dev", "domain": "dev.laslogtmx.com" }
+      }
+    }
+  },
+  "develop_branch": {
+    "created_from": "main",
+    "staging_project": "laslogtmx-dev",
+    "production_branch_for_staging": "develop",
+    "env_sections": ".env.example (PRODUCTION vs STAGING)",
+    "staging_env_template": "infra/staging/laslogtmx-dev.env.example",
+    "seed_file": "supabase/seed.staging.sql"
+  },
+  "files_updated": [
+    "apps/marketing/wrangler.jsonc",
+    "apps/web/wrangler.jsonc",
+    ".env.example",
+    "README.md",
+    "skills/webbuildSKILL.md",
+    ".agents/checkpoints/cloudflare-pages-structure.json"
+  ],
+  "files_restored_from_develop": [
+    "infra/staging/README.md",
+    "infra/staging/laslogtmx-dev.env.example",
+    "supabase/seed.staging.sql",
+    ".agents/checkpoints/staging-setup.json"
+  ],
+  "cf_pages_projects": {
+    "laslogtmx-app": {
+      "domain": "app.laslogtmx.com",
+      "branch": "main",
+      "root_directory": "apps/web",
+      "build_command": "npm run build:web",
+      "build_output_directory": ".open-next/assets"
+    },
+    "laslogtmx-marketing": {
+      "domain": "laslogtmx.com",
+      "branch": "main",
+      "root_directory": "apps/marketing",
+      "build_command": "npm run build:marketing",
+      "build_output_directory": "out"
+    },
+    "laslogtmx-dev": {
+      "domain": "dev.laslogtmx.com",
+      "branch": "develop",
+      "root_directory": "/",
+      "build_command": "npm run build:web",
+      "build_output_directory": "apps/web/.open-next/assets"
+    }
+  }
+}

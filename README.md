@@ -22,14 +22,14 @@
 | Site | CF Project | Root Directory | Production Branch | Purpose |
 |------|------------|----------------|-------------------|---------|
 | laslogtmx.com | `laslogtmx-marketing` | `apps/marketing` | `main` | Marketing / landing |
-| app.laslogtmx.com | `laslogtmx-web` | `apps/web` | `main` | Full TMS web application |
-| dev.laslogtmx.com | (see staging) | (see below) | `develop` | Staging / preview |
+| app.laslogtmx.com | `laslogtmx-app` | `apps/web` | `main` | Full TMS web application |
+| dev.laslogtmx.com | `laslogtmx-dev` | `/` | `develop` | Staging web app |
 
-Security and routing (zone-level) remain in `infra/cloudflare/rules-manifest.json`. Marketing site uses static export; web app uses full Next.js build output.
+Security and routing (zone-level) remain in `infra/cloudflare/rules-manifest.json`. Marketing site uses static export; web app uses OpenNext Cloudflare adapter.
 
 Pages configs:
-- Marketing: `apps/marketing/wrangler.toml`
-- Web: `apps/web/wrangler.toml`
+- Marketing: `apps/marketing/wrangler.jsonc`
+- Web: `apps/web/wrangler.jsonc` (neutral name `laslogtmx-web`; CF projects `laslogtmx-app` / `laslogtmx-dev` via env overrides)
 
 ### Exact Cloudflare Pages Dashboard Steps to Create Projects
 
@@ -47,11 +47,13 @@ Pages configs:
 - (Optional) Add env vars if marketing-specific vars required
 
 **Create / Update Web App project (app.laslogtmx.com):**
-- Project name: `laslogtmx-web`
+- Project name: `laslogtmx-app`
 - **Production branch**: `main`
-- **Root directory**: `apps/web`
+- **Root directory**: `apps/web` (or `/` with `npm run build:web` from monorepo root)
 - **Build command**: `npm run build:web`
-- **Build output directory**: `.vercel/output/static` (match previous adapter config)
+- **Build output directory**: `.open-next/assets`
+- **Node.js version**: `20`
+- Framework preset: **None** (OpenNext Cloudflare adapter)
 - Deploy
 - Custom domains → Add `app.laslogtmx.com`
 
@@ -59,17 +61,37 @@ Pages configs:
 - In each project: Settings → Environment variables (production + preview)
 - Add the Supabase + other `NEXT_PUBLIC_*` (see `.env.example`). Do NOT commit real keys.
 
-### Staging (dev.laslogtmx.com) on `develop` branch
+### Staging (dev.laslogtmx.com) — `laslogtmx-dev` on `develop` branch
 
-1. Create and push a `develop` branch.
-2. In **both** CF Pages projects:
-   - Go to the project → **Deployments** tab or Settings → Build & deployments → configure `develop` branch builds.
-   - Add custom domain `dev.laslogtmx.com` (may attach to preview deployment; for full custom often use a dedicated staging Pages project pointing to develop branch).
-3. Set **branch environment variables** (or preview) for both projects:
-   - `NEXT_PUBLIC_APP_URL=https://dev.laslogtmx.com`
-   - `NEXT_PUBLIC_WEB_APP_URL=https://dev.laslogtmx.com`
-   - `NEXT_PUBLIC_MARKETING_URL=https://dev.laslogtmx.com`
-4. Deploy from `develop`; add `dev.laslogtmx.com` (and `*.dev.laslogtmx.com` if needed) to Supabase Authentication → URL Configuration → Redirect URLs.
+The `develop` branch is the staging line. Staging uses a **dedicated Cloudflare Pages project** (`laslogtmx-dev`) with monorepo root `/`.
+
+**Create Staging project (laslogtmx-dev):**
+1. Dashboard → **Pages** → **Create a project** → **Connect to Git** → select `laslogtmx` repo.
+2. Project name: `laslogtmx-dev`
+3. **Production branch**: `develop`
+4. **Root directory**: `/` (monorepo root — `build:web` is defined in root `package.json`)
+5. **Build command**: `npm run build:web`
+6. **Build output directory**: `apps/web/.open-next/assets`
+7. **Node.js version**: `20`
+8. Framework preset: **None** (OpenNext Cloudflare adapter)
+9. Click **Save and Deploy**
+10. Settings → Custom domains → Add `dev.laslogtmx.com`
+
+**Staging environment variables** (Settings → Environment variables → Production, since `develop` is the production branch for this project):
+- Copy all vars from [`infra/staging/laslogtmx-dev.env.example`](infra/staging/laslogtmx-dev.env.example)
+- Use a **separate Supabase staging project** (not production)
+- Use Stripe **test** keys only (`pk_test_` / `sk_test_`)
+- See [`.env.example`](.env.example) for production vs staging sections
+
+**Supabase staging setup:**
+1. Create a new Supabase project for staging.
+2. Apply migrations: `supabase db push` (point CLI at staging project).
+3. Seed test data: run [`supabase/seed.staging.sql`](supabase/seed.staging.sql) in SQL editor.
+4. Auth → URL Configuration → add `https://dev.laslogtmx.com/**` to Redirect URLs.
+
+**Optional:** Marketing staging on `develop` can use `laslogtmx-marketing` preview deployments with root `apps/marketing` and the same URL overrides. The primary staging surface is `laslogtmx-dev` (full TMS app).
+
+Checkpoint: [`.agents/checkpoints/staging-setup.json`](.agents/checkpoints/staging-setup.json) | Staging guide: [`infra/staging/README.md`](infra/staging/README.md)
 
 **Local dev**:
 - `npm run dev:marketing`
