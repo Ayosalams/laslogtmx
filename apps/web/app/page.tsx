@@ -3,6 +3,7 @@ import Link from "next/link";
 
 const features = [
   { href: "/chat", title: "Team Chat", desc: "Company-wide & load-specific messaging with realtime updates", icon: "💬" },
+  { href: "/ai-chat", title: "AI Assistant", desc: "OKF-powered RAG for CBLE Prep, compliance, and load board", icon: "🤖" },
   { href: "/motus", title: "MOTUS Helper", desc: "FMCSA status checks, DOT claiming, troubleshooting & docs", icon: "🛡️" },
   { href: "/expenses", title: "Expenses", desc: "Expense list, receipt OCR entry, manual entry, and detention linking", icon: "💰" },
   { href: "/receipts", title: "Receipt OCR", desc: "Upload receipts, OCR extraction, mandatory correction screen", icon: "🧾" },

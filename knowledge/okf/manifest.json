@@ -1,0 +1,29 @@
+{
+  "version": "1.0.0",
+  "name": "laslogTMX OKF",
+  "description": "Open Knowledge Framework bundles for AI Chat RAG — CBLE Prep, Compliance, Load Board",
+  "updated": "2026-06-27",
+  "bundles": [
+    {
+      "id": "cble-prep",
+      "path": "bundles/cble-prep",
+      "domain": "cble_prep",
+      "tier_gate": "pro_broker",
+      "disclaimer": "INTERNAL TRAINING ONLY — Not official CBP/CBLE material."
+    },
+    {
+      "id": "compliance",
+      "path": "bundles/compliance",
+      "domain": "compliance",
+      "tier_gate": null,
+      "disclaimer": "General FMCSA guidance — verify with official FMCSA/MOTUS systems."
+    },
+    {
+      "id": "load-board",
+      "path": "bundles/load-board",
+      "domain": "load_board",
+      "tier_gate": "verified",
+      "disclaimer": "Internal load board policies — not legal or brokerage advice."
+    }
+  ]
+}

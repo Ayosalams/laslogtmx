@@ -23,6 +23,7 @@ export const LOGOS = {
 export const FEATURES = {
   militaryTimeDefault: true,
   chatSystem: true,
+  aiChat: true,
   receiptOcrCorrection: true,
   motusHelper: true,
   cblePrep: true,

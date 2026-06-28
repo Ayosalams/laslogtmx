@@ -20,6 +20,7 @@ import { AdminDashboardScreen } from '../../../../features/admin/screens/AdminDa
 import { useAdminAccess } from '../../../../features/admin/hooks/useAdminAccess';
 import { LoadBoardScreen } from '../../../../features/load-board/screens/LoadBoardScreen';
 import { useLoadBoardAccess } from '../../../../features/load-board/hooks/useLoadBoardAccess';
+import { AiChatScreen } from '../../../../features/ai-chat/screens/AiChatScreen';
 
 // Simple Settings screen extracted from previous demo
 function SettingsScreen({ navigation }: { navigation?: { navigate: (name: string) => void } }) {
@@ -177,6 +178,13 @@ export default function MainTabNavigator() {
         options={{
           tabBarLabel: 'MOTUS',
           // tabBarIcon: ({ color, size }) => <Ionicons name="construct-outline" size={size} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="AI"
+        component={AiChatScreen}
+        options={{
+          tabBarLabel: 'AI',
         }}
       />
       <Tab.Screen

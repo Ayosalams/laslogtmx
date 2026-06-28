@@ -1,0 +1,59 @@
+{
+  "feature": "OKF + Router + RAG (AI Chat)",
+  "status": "Completed",
+  "last_updated": "2026-06-27",
+  "completed": [
+    "knowledge/okf/ manifest + 3 bundles (cble-prep, compliance, load-board) with 9 example chunks",
+    "features/ai-chat/ router (keyword domain classification)",
+    "features/ai-chat/ rag (file-based term-overlap retrieval, no embeddings required)",
+    "Optional LLM synthesis via AI_CHAT_API_KEY / OPENROUTER_API_KEY (falls back to RAG-only)",
+    "POST /api/ai-chat API route with 5-minute OKF chunk cache",
+    "AiChatWeb UI at /ai-chat with domain badges, sources, suggested prompts",
+    "FEATURES.aiChat constant",
+    "Home page link to AI Assistant",
+    "supabase/migrations/20240627000000_okf_pgvector.sql stub for future pgvector upgrade",
+    ".env.example AI_CHAT_* placeholders (no secrets)",
+    "Tier gating: useAiChatAccess hook (Pro Broker+ for RAG/LLM; Verified for load_board domain)",
+    "API route auth + server-side tier validation via Supabase session",
+    "AiChatScreen mobile parity with web (chat, prompts, domain badges, sources)",
+    "MainTabNavigator AI tab integration"
+  ],
+  "next_steps": [
+    "Ingest OKF chunks into pgvector table when embedding pipeline is ready",
+    "Expand OKF chunks from real CBLE assets and MOTUS troubleshooting library",
+    "Add AI access row to mobile/web Settings screens",
+    "E2E test with real Pro Broker session against /api/ai-chat"
+  ],
+  "key_decisions": [
+    "v1 uses filesystem OKF bundles at knowledge/okf/ — same pattern as cble-assets API",
+    "Router is lightweight keyword scoring (no ML dependency)",
+    "RAG uses term overlap + tag boost; pgvector migration commented for phase 2",
+    "LLM is optional — RAG-only mode works out of the box for demos and offline dev",
+    "Domain-specific disclaimers per safetySKILL (no secrets, env-only API keys)",
+    "Tier gating mirrors useCbleAccess: AI_CHAT_MIN_TIER = pro_broker (CBLE_MIN_TIER)",
+    "load_board domain adds laslogTMX Verified check (same as useLoadBoardAccess)",
+    "Mobile calls resolveAppUrl()/api/ai-chat with Bearer session token"
+  ],
+  "blockers": [],
+  "build_status": {
+    "router_tests": "PASS — 4/4 routeQuery.test.ts",
+    "access_tests": "PASS — 9/9 aiChatAccess.test.ts",
+    "rag_integration": "PASS — 9 OKF chunks loaded, domain routing verified (run from apps/web cwd)",
+    "typescript_web": "PASS — npx tsc --noEmit -p apps/web",
+    "typescript_mobile": "PASS — npx tsc --noEmit -p apps/mobile",
+    "backup": "../Backups/laslogtmx_20260627_2200/"
+  },
+  "usage": {
+    "web_ui": "https://app.laslogtmx.com/ai-chat (or http://localhost:3000/ai-chat)",
+    "mobile_tab": "MainTabNavigator → AI tab",
+    "api": "POST /api/ai-chat Authorization: Bearer <session> { \"message\": \"...\" }",
+    "okf_bundles": "knowledge/okf/bundles/{cble-prep,compliance,load-board}/",
+    "optional_llm": "Set AI_CHAT_API_KEY in apps/web/.env.local",
+    "tier_requirements": {
+      "advanced_rag_llm": "Pro Broker or Enterprise",
+      "cble_prep_domain": "Pro Broker or Enterprise",
+      "load_board_domain": "Pro Broker+ and laslogTMX Verified",
+      "compliance_domain": "Pro Broker or Enterprise"
+    }
+  }
+}

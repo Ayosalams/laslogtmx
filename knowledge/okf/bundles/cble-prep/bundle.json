@@ -1,0 +1,12 @@
+{
+  "id": "cble-prep",
+  "title": "CBLE Prep Knowledge",
+  "domain": "cble_prep",
+  "description": "Customs broker license exam training — HTS, entry procedures, 19 CFR fundamentals",
+  "tags": ["cble", "customs", "hts", "broker", "19-cfr", "ace", "classification"],
+  "chunks": [
+    { "file": "chunks/hts-gri-basics.md", "id": "cble-hts-gri-001" },
+    { "file": "chunks/broker-authority.md", "id": "cble-broker-auth-001" },
+    { "file": "chunks/entry-types.md", "id": "cble-entry-types-001" }
+  ]
+}

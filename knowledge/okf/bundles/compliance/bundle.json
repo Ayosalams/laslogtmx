@@ -1,0 +1,12 @@
+{
+  "id": "compliance",
+  "title": "FMCSA Compliance Knowledge",
+  "domain": "compliance",
+  "description": "DOT authority, MOTUS linking, insurance, MCS-150, and common carrier compliance",
+  "tags": ["fmcsa", "motus", "dot", "mcs-150", "insurance", "authority", "oos"],
+  "chunks": [
+    { "file": "chunks/fmcsa-dot-linking.md", "id": "comp-dot-link-001" },
+    { "file": "chunks/insurance-requirements.md", "id": "comp-insurance-001" },
+    { "file": "chunks/mcs-150-filing.md", "id": "comp-mcs150-001" }
+  ]
+}

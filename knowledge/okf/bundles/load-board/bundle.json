@@ -1,0 +1,12 @@
+{
+  "id": "load-board",
+  "title": "Internal Load Board Knowledge",
+  "domain": "load_board",
+  "description": "Smart matching, bidding etiquette, contracts, and laslogTMX Verified policies",
+  "tags": ["load-board", "matching", "bidding", "contract", "rate", "verified", "broker", "carrier"],
+  "chunks": [
+    { "file": "chunks/matching-preferences.md", "id": "lb-match-prefs-001" },
+    { "file": "chunks/bidding-etiquette.md", "id": "lb-bidding-001" },
+    { "file": "chunks/contract-basics.md", "id": "lb-contract-001" }
+  ]
+}
