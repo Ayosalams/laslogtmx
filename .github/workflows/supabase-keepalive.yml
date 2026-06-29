@@ -9,9 +9,38 @@ jobs:
   keep-alive:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase (Publishable Key - Safe Read-Only)
+      - name: Ping Supabase REST API (read-only)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          # Publishable (sb_publishable_...) or legacy anon JWT — both are safe read-only keys
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          curl -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
-          echo "✅ Supabase keep-alive ping successful using publishable key."
+          set -euo pipefail
+
+          if [ -z "${SUPABASE_URL:-}" ]; then
+            echo "::error::SUPABASE_URL secret is missing. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+          if [ -z "${SUPABASE_ANON_KEY:-}" ]; then
+            echo "::error::SUPABASE_ANON_KEY secret is missing. Use your Supabase publishable (anon) key."
+            exit 1
+          fi
+
+          BASE_URL="${SUPABASE_URL%/}"
+          ENDPOINT="${BASE_URL}/rest/v1/"
+
+          echo "Pinging Supabase REST API (read-only GET)…"
+
+          HTTP_CODE=$(curl -sS -o /dev/null -w "%{http_code}" \
+            -X GET "${ENDPOINT}" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "Accept: application/json")
+
+          if [ "${HTTP_CODE}" -ge 200 ] && [ "${HTTP_CODE}" -lt 400 ]; then
+            echo "✅ Supabase keep-alive successful (HTTP ${HTTP_CODE}). Project is active."
+          else
+            echo "::error::Supabase REST API ping failed (HTTP ${HTTP_CODE}). Check SUPABASE_URL and SUPABASE_ANON_KEY (publishable/anon key)."
+            exit 1
+          fi
