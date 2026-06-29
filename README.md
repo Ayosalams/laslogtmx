@@ -17,19 +17,26 @@
 
 ## Cloudflare Deployment (Multi-Project)
 
-**Two separate Cloudflare Pages projects** (monorepo with Turborepo):
+**Three Cloudflare Pages projects** (monorepo with Turborepo):
 
-| Site | CF Project | Root Directory | Production Branch | Purpose |
-|------|------------|----------------|-------------------|---------|
-| laslogtmx.com | `laslogtmx-marketing` | `apps/marketing` | `main` | Marketing / landing |
-| app.laslogtmx.com | `laslogtmx-app` | `apps/web` | `main` | Full TMS web application |
-| dev.laslogtmx.com | `laslogtmx-dev` | `/` | `develop` | Staging web app |
+| Setting | `laslogtmx-marketing` | `laslogtmx-app` | `laslogtmx-dev` |
+|---------|----------------------|-----------------|-----------------|
+| **Domain** | laslogtmx.com | app.laslogtmx.com | dev.laslogtmx.com |
+| **Purpose** | Marketing / landing | Full TMS web app | Staging / demo |
+| **Production branch** | `main` | `main` | `develop` |
+| **Root directory** | `apps/marketing` | `apps/web` | `/` (monorepo root) |
+| **Build command** | `npm run build:marketing` | `npm run build:web` | `npm run build:web` |
+| **Build output** | `out` | `.open-next/assets` | `apps/web/.open-next/assets` |
+| **Node.js version** | `20` | `20` | `20` |
+| **Framework preset** | Next.js (or None) | None (OpenNext) | None (OpenNext) |
+| **Wrangler config** | `apps/marketing/wrangler.jsonc` | `apps/web/wrangler.jsonc` | `apps/web/wrangler.jsonc` |
+| **Wrangler env** | `production` | `production` | `staging` |
 
 Security and routing (zone-level) remain in `infra/cloudflare/rules-manifest.json`. Marketing site uses static export; web app uses OpenNext Cloudflare adapter.
 
 Pages configs:
-- Marketing: `apps/marketing/wrangler.jsonc`
-- Web: `apps/web/wrangler.jsonc` (neutral name `laslogtmx-web`; CF projects `laslogtmx-app` / `laslogtmx-dev` via env overrides)
+- Marketing: `apps/marketing/wrangler.jsonc` — env `production` → `laslogtmx-marketing`
+- Web: `apps/web/wrangler.jsonc` — neutral name `laslogtmx-web`; env `production` → `laslogtmx-app`, env `staging` → `laslogtmx-dev`
 
 ### Exact Cloudflare Pages Dashboard Steps to Create Projects
 
@@ -76,6 +83,8 @@ The `develop` branch is the staging line. Staging uses a **dedicated Cloudflare 
 8. Framework preset: **None** (OpenNext Cloudflare adapter)
 9. Click **Save and Deploy**
 10. Settings → Custom domains → Add `dev.laslogtmx.com`
+
+**Wrangler env**: `staging` in `apps/web/wrangler.jsonc` sets `WORKER_SELF_REFERENCE` → `laslogtmx-dev`.
 
 **Staging environment variables** (Settings → Environment variables → Production, since `develop` is the production branch for this project):
 - Copy all vars from [`infra/staging/laslogtmx-dev.env.example`](infra/staging/laslogtmx-dev.env.example)

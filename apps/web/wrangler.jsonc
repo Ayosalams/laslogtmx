@@ -1,5 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
+  // Neutral wrangler name — actual CF Pages project names are set per env below
   "name": "laslogtmx-web",
   "compatibility_date": "2026-06-27",
   "compatibility_flags": ["nodejs_compat"],
@@ -17,6 +18,7 @@
       "/expenses/*"
     ]
   },
+  // Default WORKER_SELF_REFERENCE (production; overridden per env below)
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
@@ -27,8 +29,10 @@
   "observability": {
     "enabled": true
   },
-  // Per-environment CF Pages project names (wrangler name stays neutral)
+  // Per-environment CF Pages project overrides (wrangler deploy --env <name>)
   "env": {
+    // PRODUCTION — CF project laslogtmx-app | branch main | domain app.laslogtmx.com
+    // Root dir: apps/web | Build: npm run build:web | Output: .open-next/assets
     "production": {
       "name": "laslogtmx-app",
       "services": [
@@ -38,7 +42,9 @@
         }
       ]
     },
-    "preview": {
+    // STAGING — CF project laslogtmx-dev | branch develop | domain dev.laslogtmx.com
+    // Root dir: / (monorepo) | Build: npm run build:web | Output: apps/web/.open-next/assets
+    "staging": {
       "name": "laslogtmx-dev",
       "services": [
         {

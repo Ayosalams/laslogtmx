@@ -1,6 +1,6 @@
 # Web Build Skills
 # laslogTMX Web Build Guidelines
-Version: 2026-06-27
+Version: 2026-06-28
 
 > **SAFETY CHECK REQUIRED**: At the start of every major task, read and follow `skills/safetySKILL.md` in full. State "SAFETY CHECK PASSED" before making changes. Never hardcode secrets. Limit blast radius.
 
@@ -11,14 +11,23 @@ Version: 2026-06-27
 - dev.laslogtmx.com → Staging/Demo (`laslogtmx-dev` project on `develop` branch)
 - laslogs.cc (legacy) → 301 redirect to laslogtmx.com — never reference in new code
 
-**Cloudflare Multi-Project Setup**:
-- Marketing (laslogtmx.com): CF project `laslogtmx-marketing`, Root dir = `apps/marketing`, Production branch = `main`
-- Web app (app.laslogtmx.com): CF project `laslogtmx-app`, Root dir = `apps/web` (or `/` with `npm run build:web`), Production branch = `main`
-- Staging (dev.laslogtmx.com): CF project `laslogtmx-dev`, Root dir = `/`, Production branch = `develop`
+## Cloudflare Pages — Exact Settings (All 3 Projects)
+
+| Setting | `laslogtmx-marketing` | `laslogtmx-app` | `laslogtmx-dev` |
+|---------|----------------------|-----------------|-----------------|
+| **Domain** | laslogtmx.com | app.laslogtmx.com | dev.laslogtmx.com |
+| **Production branch** | `main` | `main` | `develop` |
+| **Root directory** | `apps/marketing` | `apps/web` | `/` (monorepo root) |
+| **Build command** | `npm run build:marketing` | `npm run build:web` | `npm run build:web` |
+| **Build output** | `out` | `.open-next/assets` | `apps/web/.open-next/assets` |
+| **Node.js** | `20` | `20` | `20` |
+| **Framework preset** | Next.js (or None) | None (OpenNext) | None (OpenNext) |
+| **Wrangler config** | `apps/marketing/wrangler.jsonc` | `apps/web/wrangler.jsonc` | `apps/web/wrangler.jsonc` |
+| **Wrangler env** | `production` | `production` | `staging` |
 
 **Wrangler configs** (source of truth for OpenNext/Pages):
-- Marketing: `apps/marketing/wrangler.jsonc` — static export, `pages_build_output_dir: ./out`
-- Web: `apps/web/wrangler.jsonc` — OpenNext output, `main: .open-next/worker.js`, `nodejs_compat`, per-env names `laslogtmx-app` (prod) / `laslogtmx-dev` (preview)
+- Marketing: `apps/marketing/wrangler.jsonc` — static export, `pages_build_output_dir: ./out`, env `production` → `laslogtmx-marketing`
+- Web: `apps/web/wrangler.jsonc` — OpenNext output, `main: .open-next/worker.js`, `nodejs_compat`, env `production` → `laslogtmx-app`, env `staging` → `laslogtmx-dev` with `WORKER_SELF_REFERENCE` → `laslogtmx-dev`
 
 **Cloudflare** (see `infra/cloudflare/rules-manifest.json`):
 - HSTS preload via `apps/web/public/_headers`
@@ -42,9 +51,10 @@ Version: 2026-06-27
 | Build command | `npm run build:web` |
 | Build output | `apps/web/.open-next/assets` |
 | Node.js | `20` |
+| Wrangler env | `staging` (`WORKER_SELF_REFERENCE` → `laslogtmx-dev`) |
 | Custom domain | `dev.laslogtmx.com` |
 
-**Env vars**: Copy from `infra/staging/laslogtmx-dev.env.example` into CF dashboard. Use staging Supabase project + Stripe test keys. See `.env.example` for production vs staging sections.
+**Env vars**: Copy from `infra/staging/laslogtmx-dev.env.example` into CF dashboard (Production env — `develop` is the prod branch for this project). Use staging Supabase project + Stripe test keys. See `.env.example` for production vs staging sections.
 
 **Seed data**: Run `supabase/seed.staging.sql` on the staging Supabase project only (5 test companies, operational + internal board loads).
 
