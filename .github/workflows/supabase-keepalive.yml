@@ -1,10 +1,9 @@
 # =============================================================================
 # Supabase Keep-Alive — prevents free-tier project pause from inactivity.
 #
-# Pings the public Auth health endpoint (no API key required). Optionally
-# validates REST access when SUPABASE_ANON_KEY is configured.
+# Pings /auth/v1/health with the publishable/anon apikey header.
 #
-# Optional GitHub Actions secrets (Settings → Secrets and variables → Actions):
+# REQUIRED GitHub Actions secret (Settings → Secrets and variables → Actions):
 #   SUPABASE_ANON_KEY  or  NEXT_PUBLIC_SUPABASE_ANON_KEY
 #   (publishable sb_publishable_... or legacy JWT eyJ...)
 #
@@ -140,17 +139,7 @@ jobs:
             return 1
           }
 
-          # ── Primary keep-alive: Auth health (no API key required) ─────────
-          echo "Pinging Supabase Auth health endpoint…"
-          if ping_url "Auth health" "${SUPABASE_URL}/auth/v1/health" \
-            --header "Accept: application/json"; then
-            echo "✅ Supabase keep-alive successful via Auth health check."
-          else
-            echo "::error::Supabase Auth health ping failed."
-            exit 1
-          fi
-
-          # ── Optional: REST validation when API key is configured ──────────
+          # ── Resolve API key (required — health endpoint needs apikey header) ─
           API_KEY="$(pick_first_nonempty \
             "${SECRET_KEY:-}" \
             "${SECRET_KEY_ALT:-}" \
@@ -160,23 +149,26 @@ jobs:
           API_KEY="$(normalize_value "${API_KEY}")"
 
           if [ -z "${API_KEY}" ]; then
-            echo "Note — no API key secret configured; skipped REST validation."
-            exit 0
+            echo "::error::Supabase anon/publishable key is missing."
+            echo "Add GitHub Actions secret: SUPABASE_ANON_KEY"
+            echo "  (or NEXT_PUBLIC_SUPABASE_ANON_KEY)"
+            echo "One-time setup: powershell -File infra/github/setup-keepalive-secrets.ps1"
+            exit 1
           fi
 
-          echo "Validating REST API access (optional)…"
-          REST_ARGS=(--header "apikey: ${API_KEY}" --header "Accept: application/json")
-
-          # Publishable/secret keys (sb_*) are NOT JWTs — do not send Bearer auth.
-          # Legacy anon JWT keys (eyJ...) require Authorization: Bearer.
+          # ── Primary keep-alive: Auth health with apikey header ────────────
+          # Supabase requires apikey even on /auth/v1/health (returns 401 without it).
+          # Publishable sb_publishable_* keys work here. Do NOT send Bearer for sb_* keys.
+          echo "Pinging Supabase Auth health endpoint…"
+          HEALTH_ARGS=(--header "apikey: ${API_KEY}" --header "Accept: application/json")
           if [[ "${API_KEY}" == eyJ* ]]; then
-            REST_ARGS+=(--header "Authorization: Bearer ${API_KEY}")
+            HEALTH_ARGS+=(--header "Authorization: Bearer ${API_KEY}")
           fi
 
-          if ping_url "REST" "${SUPABASE_URL}/rest/v1/" "${REST_ARGS[@]}"; then
-            echo "✅ REST API validation successful."
+          if ping_url "Auth health" "${SUPABASE_URL}/auth/v1/health" "${HEALTH_ARGS[@]}"; then
+            echo "✅ Supabase keep-alive successful via Auth health check."
           else
-            echo "::warning::REST validation failed, but Auth health check passed."
-            echo "If using sb_publishable_ keys, ensure the secret is current."
-            echo "Keep-alive still succeeded — project activity was recorded."
+            echo "::error::Supabase Auth health ping failed."
+            echo "Verify SUPABASE_ANON_KEY is the current publishable/anon key."
+            exit 1
           fi
