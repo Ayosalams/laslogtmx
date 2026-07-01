@@ -1,20 +1,19 @@
 # =============================================================================
 # Supabase Keep-Alive — prevents free-tier project pause from inactivity.
 #
-# Credentials (GitHub → Settings → Secrets and variables → Actions)
-# ─────────────────────────────────────────────────────────────────────────────
-# REQUIRED (one of these secret names for the anon/publishable key):
-#   SUPABASE_ANON_KEY  (preferred)
-#   NEXT_PUBLIC_SUPABASE_ANON_KEY
+# Pings the public Auth health endpoint (no API key required). Optionally
+# validates REST access when SUPABASE_ANON_KEY is configured.
 #
-# OPTIONAL URL secret/variable (defaults to production project URL below):
+# Optional GitHub Actions secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_ANON_KEY  or  NEXT_PUBLIC_SUPABASE_ANON_KEY
+#   (publishable sb_publishable_... or legacy JWT eyJ...)
+#
+# Optional URL override:
 #   SUPABASE_URL  or  NEXT_PUBLIC_SUPABASE_URL
-#
-# The project URL is public (same as NEXT_PUBLIC_SUPABASE_URL in .env.example).
-# Only the anon/publishable key must be stored as a secret.
+#   (defaults to production project URL below)
 #
 # One-time setup from repo root:
-#   pwsh infra/github/setup-keepalive-secrets.ps1
+#   powershell -File infra/github/setup-keepalive-secrets.ps1
 #
 # Manual run: Actions → Supabase Keep-Alive → Run workflow
 # Schedule: daily at 09:00 UTC
@@ -28,14 +27,13 @@ on:
   workflow_dispatch:
 
 env:
-  # Public production URL — matches .env.example (not a secret).
   DEFAULT_SUPABASE_URL: https://gnwufbvrxcvnrfvanmrg.supabase.co
 
 jobs:
   keep-alive:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase REST API (read-only)
+      - name: Ping Supabase (health + optional REST)
         env:
           SECRET_URL: ${{ secrets.SUPABASE_URL }}
           SECRET_URL_ALT: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -59,6 +57,17 @@ jobs:
             return 1
           }
 
+          normalize_value() {
+            local value="$1"
+            value="${value//$'\r'/}"
+            value="${value//$'\n'/}"
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+            value="${value#\"}"; value="${value%\"}"
+            value="${value#\'}"; value="${value%\'}"
+            printf '%s' "${value}"
+          }
+
           SUPABASE_URL="$(pick_first_nonempty \
             "${SECRET_URL:-}" \
             "${SECRET_URL_ALT:-}" \
@@ -66,125 +75,108 @@ jobs:
             "${VAR_URL_ALT:-}" \
             "${DEFAULT_SUPABASE_URL:-}" \
             || true)"
+          SUPABASE_URL="$(normalize_value "${SUPABASE_URL}")"
+          SUPABASE_URL="${SUPABASE_URL%/}"
 
-          SUPABASE_ANON_KEY="$(pick_first_nonempty \
+          if [[ ! "${SUPABASE_URL}" =~ ^https?:// ]]; then
+            if [[ "${SUPABASE_URL}" =~ ^[a-zA-Z0-9][-a-zA-Z0-9.]*\.supabase\.co$ ]]; then
+              SUPABASE_URL="https://${SUPABASE_URL}"
+            fi
+          fi
+
+          if [[ -z "${SUPABASE_URL}" || ! "${SUPABASE_URL}" =~ ^https?://[^/[:space:]?#]+ ]]; then
+            echo "::error::Supabase URL is missing or invalid."
+            exit 1
+          fi
+
+          HOST_PART="$(printf '%s' "${SUPABASE_URL}" | sed -E 's#^https?://([^/]+).*#\1#')"
+          echo "Debug — target host: ${HOST_PART}"
+
+          ping_url() {
+            local label="$1"
+            local url="$2"
+            shift 2
+            local output err code exit_code
+            output="$(mktemp)"
+            err="$(mktemp)"
+            code="000"
+            exit_code=0
+            code="$(curl \
+              --globoff \
+              --silent \
+              --show-error \
+              --output "${output}" \
+              --write-out '%{http_code}' \
+              --max-time 30 \
+              --retry 2 \
+              --retry-delay 3 \
+              --retry-connrefused \
+              --request GET \
+              --url "${url}" \
+              "$@" \
+              2>"${err}")" || exit_code=$?
+
+            if [ "${exit_code}" -ne 0 ] && [ "${code}" = "000" ]; then
+              echo "::error::${label} curl failed (exit ${exit_code})."
+              if [ -s "${err}" ]; then
+                echo "Debug — curl error: $(head -c 300 "${err}")"
+              fi
+              rm -f "${output}" "${err}"
+              return 1
+            fi
+
+            echo "${label} HTTP status: ${code}"
+            if [ "${code}" -ge 200 ] && [ "${code}" -lt 400 ]; then
+              rm -f "${output}" "${err}"
+              return 0
+            fi
+
+            if [ -s "${output}" ]; then
+              echo "Response body (truncated):"
+              head -c 300 "${output}"
+              echo ""
+            fi
+            rm -f "${output}" "${err}"
+            return 1
+          }
+
+          # ── Primary keep-alive: Auth health (no API key required) ─────────
+          echo "Pinging Supabase Auth health endpoint…"
+          if ping_url "Auth health" "${SUPABASE_URL}/auth/v1/health" \
+            --header "Accept: application/json"; then
+            echo "✅ Supabase keep-alive successful via Auth health check."
+          else
+            echo "::error::Supabase Auth health ping failed."
+            exit 1
+          fi
+
+          # ── Optional: REST validation when API key is configured ──────────
+          API_KEY="$(pick_first_nonempty \
             "${SECRET_KEY:-}" \
             "${SECRET_KEY_ALT:-}" \
             "${VAR_KEY:-}" \
             "${VAR_KEY_ALT:-}" \
             || true)"
-
-          # ── Validate credentials ──────────────────────────────────────────
-          if [ -z "${SUPABASE_URL:-}" ]; then
-            echo "::error::Supabase URL is missing."
-            echo "Set DEFAULT_SUPABASE_URL in the workflow or add SUPABASE_URL secret."
-            exit 1
-          fi
-
-          if [ -z "${SUPABASE_ANON_KEY:-}" ]; then
-            echo "::error::Supabase anon/publishable key is missing."
-            echo "Add GitHub Actions secret: SUPABASE_ANON_KEY"
-            echo "  (or NEXT_PUBLIC_SUPABASE_ANON_KEY)"
-            echo "Value: Supabase Dashboard → Project Settings → API → anon/publishable key"
-            echo "One-time setup: pwsh infra/github/setup-keepalive-secrets.ps1"
-            exit 1
-          fi
-
-          # ── Normalize URL (strip whitespace, CR/LF, quotes) ─────────────
-          BASE_URL="${SUPABASE_URL}"
-          BASE_URL="${BASE_URL//$'\r'/}"
-          BASE_URL="${BASE_URL//$'\n'/}"
-          BASE_URL="${BASE_URL#"${BASE_URL%%[![:space:]]*}"}"
-          BASE_URL="${BASE_URL%"${BASE_URL##*[![:space:]]}"}"
-          BASE_URL="${BASE_URL#\"}"; BASE_URL="${BASE_URL%\"}"
-          BASE_URL="${BASE_URL#\'}"; BASE_URL="${BASE_URL%\'}"
-          BASE_URL="${BASE_URL%/}"
-
-          if [[ ! "${BASE_URL}" =~ ^https?:// ]]; then
-            if [[ "${BASE_URL}" =~ ^[a-zA-Z0-9][-a-zA-Z0-9.]*\.supabase\.co$ ]]; then
-              echo "Debug — SUPABASE_URL missing scheme; prepending https://"
-              BASE_URL="https://${BASE_URL}"
-            fi
-          fi
-
-          if [[ -z "${BASE_URL}" ]]; then
-            echo "::error::SUPABASE_URL resolved to an empty string after normalization."
-            exit 1
-          fi
-
-          if [[ ! "${BASE_URL}" =~ ^https?://[^/[:space:]?#]+ ]]; then
-            echo "::error::SUPABASE_URL is not a valid URL with a host."
-            echo "Expected format: https://<project-ref>.supabase.co"
-            exit 1
-          fi
-
-          # ── Normalize API key ─────────────────────────────────────────────
-          API_KEY="${SUPABASE_ANON_KEY}"
-          API_KEY="${API_KEY//$'\r'/}"
-          API_KEY="${API_KEY//$'\n'/}"
-          API_KEY="${API_KEY#"${API_KEY%%[![:space:]]*}"}"
-          API_KEY="${API_KEY%"${API_KEY##*[![:space:]]}"}"
-          API_KEY="${API_KEY#\"}"; API_KEY="${API_KEY%\"}"
-          API_KEY="${API_KEY#\'}"; API_KEY="${API_KEY%\'}"
+          API_KEY="$(normalize_value "${API_KEY}")"
 
           if [ -z "${API_KEY}" ]; then
-            echo "::error::SUPABASE_ANON_KEY resolved to empty after normalization."
-            echo "Re-create the secret with no quotes or trailing newlines."
-            exit 1
+            echo "Note — no API key secret configured; skipped REST validation."
+            exit 0
           fi
 
-          ENDPOINT="${BASE_URL}/rest/v1/"
+          echo "Validating REST API access (optional)…"
+          REST_ARGS=(--header "apikey: ${API_KEY}" --header "Accept: application/json")
 
-          HOST_PART="$(printf '%s' "${BASE_URL}" | sed -E 's#^https?://([^/]+).*#\1#')"
-          echo "Debug — target host: ${HOST_PART}"
-          echo "Debug — endpoint path: /rest/v1/"
-          echo "Pinging Supabase REST API (read-only GET)…"
-
-          CURL_OUTPUT="$(mktemp)"
-          CURL_ERR="$(mktemp)"
-          HTTP_CODE="000"
-          CURL_EXIT=0
-
-          HTTP_CODE="$(curl \
-            --globoff \
-            --silent \
-            --show-error \
-            --output "${CURL_OUTPUT}" \
-            --write-out '%{http_code}' \
-            --max-time 30 \
-            --retry 2 \
-            --retry-delay 3 \
-            --retry-connrefused \
-            --request GET \
-            --url "${ENDPOINT}" \
-            --header "apikey: ${API_KEY}" \
-            --header "Authorization: Bearer ${API_KEY}" \
-            --header "Accept: application/json" \
-            2>"${CURL_ERR}")" || CURL_EXIT=$?
-
-          if [ "${CURL_EXIT}" -ne 0 ] && [ "${HTTP_CODE}" = "000" ]; then
-            echo "::error::curl failed before receiving an HTTP response (exit ${CURL_EXIT})."
-            if [ -s "${CURL_ERR}" ]; then
-              echo "Debug — curl error: $(head -c 300 "${CURL_ERR}")"
-            fi
-            rm -f "${CURL_OUTPUT}" "${CURL_ERR}"
-            exit 1
+          # Publishable/secret keys (sb_*) are NOT JWTs — do not send Bearer auth.
+          # Legacy anon JWT keys (eyJ...) require Authorization: Bearer.
+          if [[ "${API_KEY}" == eyJ* ]]; then
+            REST_ARGS+=(--header "Authorization: Bearer ${API_KEY}")
           fi
 
-          echo "HTTP status: ${HTTP_CODE}"
-
-          if [ "${HTTP_CODE}" -ge 200 ] && [ "${HTTP_CODE}" -lt 400 ]; then
-            echo "✅ Supabase keep-alive successful (HTTP ${HTTP_CODE}). Project is active."
+          if ping_url "REST" "${SUPABASE_URL}/rest/v1/" "${REST_ARGS[@]}"; then
+            echo "✅ REST API validation successful."
           else
-            echo "::error::Supabase REST API ping failed (HTTP ${HTTP_CODE})."
-            echo "Verify SUPABASE_ANON_KEY in GitHub Actions secrets."
-            if [ -s "${CURL_OUTPUT}" ]; then
-              echo "Response body (truncated):"
-              head -c 500 "${CURL_OUTPUT}"
-              echo ""
-            fi
-            rm -f "${CURL_OUTPUT}" "${CURL_ERR}"
-            exit 1
+            echo "::warning::REST validation failed, but Auth health check passed."
+            echo "If using sb_publishable_ keys, ensure the secret is current."
+            echo "Keep-alive still succeeded — project activity was recorded."
           fi
-
-          rm -f "${CURL_OUTPUT}" "${CURL_ERR}"
