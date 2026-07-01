@@ -1,27 +1,22 @@
 # =============================================================================
 # Supabase Keep-Alive — prevents free-tier project pause from inactivity.
 #
-# REQUIRED GitHub Actions secrets
+# Credentials (GitHub → Settings → Secrets and variables → Actions)
 # ─────────────────────────────────────────────────────────────────────────────
-# Add at: GitHub repo → Settings → Secrets and variables → Actions
-#         → New repository secret (create BOTH secrets below)
+# REQUIRED (one of these secret names for the anon/publishable key):
+#   SUPABASE_ANON_KEY  (preferred)
+#   NEXT_PUBLIC_SUPABASE_ANON_KEY
 #
-# 1) SUPABASE_URL
-#    • Name:  SUPABASE_URL
-#    • Value: https://<project-ref>.supabase.co
-#    • Where: Supabase Dashboard → Project Settings → API → Project URL
-#    • Rules: Must include https://, no trailing slash, no quotes, no spaces.
-#             Copy/paste only the URL — do NOT paste the anon key here.
-#    • Example: https://gnwufbvrxcvnrfvanmrg.supabase.co
+# OPTIONAL URL secret/variable (defaults to production project URL below):
+#   SUPABASE_URL  or  NEXT_PUBLIC_SUPABASE_URL
 #
-# 2) SUPABASE_ANON_KEY
-#    • Name:  SUPABASE_ANON_KEY
-#    • Value: publishable key (sb_publishable_...) or legacy anon JWT (eyJ...)
-#    • Where: Supabase Dashboard → Project Settings → API → anon / publishable key
-#    • Rules: Use the publishable/anon key only — NEVER the service_role key.
-#             No quotes, no trailing newline when pasting.
+# The project URL is public (same as NEXT_PUBLIC_SUPABASE_URL in .env.example).
+# Only the anon/publishable key must be stored as a secret.
 #
-# Optional: run manually via Actions → Supabase Keep-Alive → Run workflow
+# One-time setup from repo root:
+#   pwsh infra/github/setup-keepalive-secrets.ps1
+#
+# Manual run: Actions → Supabase Keep-Alive → Run workflow
 # Schedule: daily at 09:00 UTC
 # =============================================================================
 
@@ -32,43 +27,79 @@ on:
     - cron: '0 9 * * *'   # Daily at 9:00 UTC
   workflow_dispatch:
 
+env:
+  # Public production URL — matches .env.example (not a secret).
+  DEFAULT_SUPABASE_URL: https://gnwufbvrxcvnrfvanmrg.supabase.co
+
 jobs:
   keep-alive:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Supabase REST API (read-only)
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SECRET_URL: ${{ secrets.SUPABASE_URL }}
+          SECRET_URL_ALT: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          VAR_URL: ${{ vars.SUPABASE_URL }}
+          VAR_URL_ALT: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          SECRET_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SECRET_KEY_ALT: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          VAR_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          VAR_KEY_ALT: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          DEFAULT_SUPABASE_URL: ${{ env.DEFAULT_SUPABASE_URL }}
         run: |
           set -euo pipefail
 
-          # ── Validate secrets are present ──────────────────────────────────
+          pick_first_nonempty() {
+            for candidate in "$@"; do
+              if [ -n "${candidate}" ]; then
+                printf '%s' "${candidate}"
+                return 0
+              fi
+            done
+            return 1
+          }
+
+          SUPABASE_URL="$(pick_first_nonempty \
+            "${SECRET_URL:-}" \
+            "${SECRET_URL_ALT:-}" \
+            "${VAR_URL:-}" \
+            "${VAR_URL_ALT:-}" \
+            "${DEFAULT_SUPABASE_URL:-}" \
+            || true)"
+
+          SUPABASE_ANON_KEY="$(pick_first_nonempty \
+            "${SECRET_KEY:-}" \
+            "${SECRET_KEY_ALT:-}" \
+            "${VAR_KEY:-}" \
+            "${VAR_KEY_ALT:-}" \
+            || true)"
+
+          # ── Validate credentials ──────────────────────────────────────────
           if [ -z "${SUPABASE_URL:-}" ]; then
-            echo "::error::SUPABASE_URL secret is missing or empty."
-            echo "Add it: Settings → Secrets and variables → Actions → New repository secret"
-            echo "Name: SUPABASE_URL | Value: https://<project-ref>.supabase.co"
+            echo "::error::Supabase URL is missing."
+            echo "Set DEFAULT_SUPABASE_URL in the workflow or add SUPABASE_URL secret."
             exit 1
           fi
 
           if [ -z "${SUPABASE_ANON_KEY:-}" ]; then
-            echo "::error::SUPABASE_ANON_KEY secret is missing or empty."
-            echo "Add it: Settings → Secrets and variables → Actions → New repository secret"
-            echo "Name: SUPABASE_ANON_KEY | Value: publishable/anon key from Supabase → API settings"
+            echo "::error::Supabase anon/publishable key is missing."
+            echo "Add GitHub Actions secret: SUPABASE_ANON_KEY"
+            echo "  (or NEXT_PUBLIC_SUPABASE_ANON_KEY)"
+            echo "Value: Supabase Dashboard → Project Settings → API → anon/publishable key"
+            echo "One-time setup: pwsh infra/github/setup-keepalive-secrets.ps1"
             exit 1
           fi
 
-          # ── Normalize URL (strip whitespace, CR/LF, quotes) ───────────────
+          # ── Normalize URL (strip whitespace, CR/LF, quotes) ─────────────
           BASE_URL="${SUPABASE_URL}"
-          BASE_URL="${BASE_URL//$'\r'/}"                                    # strip CR
-          BASE_URL="${BASE_URL//$'\n'/}"                                    # strip LF
-          BASE_URL="${BASE_URL#"${BASE_URL%%[![:space:]]*}"}"              # trim leading space
-          BASE_URL="${BASE_URL%"${BASE_URL##*[![:space:]]}"}"              # trim trailing space
-          BASE_URL="${BASE_URL#\"}"; BASE_URL="${BASE_URL%\"}"              # strip double quotes
-          BASE_URL="${BASE_URL#\'}"; BASE_URL="${BASE_URL%\'}"              # strip single quotes
-          BASE_URL="${BASE_URL%/}"                                          # strip trailing slash
+          BASE_URL="${BASE_URL//$'\r'/}"
+          BASE_URL="${BASE_URL//$'\n'/}"
+          BASE_URL="${BASE_URL#"${BASE_URL%%[![:space:]]*}"}"
+          BASE_URL="${BASE_URL%"${BASE_URL##*[![:space:]]}"}"
+          BASE_URL="${BASE_URL#\"}"; BASE_URL="${BASE_URL%\"}"
+          BASE_URL="${BASE_URL#\'}"; BASE_URL="${BASE_URL%\'}"
+          BASE_URL="${BASE_URL%/}"
 
-          # Auto-fix: prepend https:// when only host/ref was pasted
           if [[ ! "${BASE_URL}" =~ ^https?:// ]]; then
             if [[ "${BASE_URL}" =~ ^[a-zA-Z0-9][-a-zA-Z0-9.]*\.supabase\.co$ ]]; then
               echo "Debug — SUPABASE_URL missing scheme; prepending https://"
@@ -76,35 +107,39 @@ jobs:
             fi
           fi
 
-          # ── Validate URL has a host before curl ───────────────────────────
           if [[ -z "${BASE_URL}" ]]; then
             echo "::error::SUPABASE_URL resolved to an empty string after normalization."
-            echo "Re-create the secret with: https://<project-ref>.supabase.co"
             exit 1
           fi
 
           if [[ ! "${BASE_URL}" =~ ^https?://[^/[:space:]?#]+ ]]; then
             echo "::error::SUPABASE_URL is not a valid URL with a host."
             echo "Expected format: https://<project-ref>.supabase.co"
-            echo "Debug — URL length: ${#BASE_URL} chars"
-            if [ "${#BASE_URL}" -ge 8 ]; then
-              echo "Debug — starts with: ${BASE_URL:0:8}..."
-            else
-              echo "Debug — value too short to be a valid Supabase project URL."
-            fi
+            exit 1
+          fi
+
+          # ── Normalize API key ─────────────────────────────────────────────
+          API_KEY="${SUPABASE_ANON_KEY}"
+          API_KEY="${API_KEY//$'\r'/}"
+          API_KEY="${API_KEY//$'\n'/}"
+          API_KEY="${API_KEY#"${API_KEY%%[![:space:]]*}"}"
+          API_KEY="${API_KEY%"${API_KEY##*[![:space:]]}"}"
+          API_KEY="${API_KEY#\"}"; API_KEY="${API_KEY%\"}"
+          API_KEY="${API_KEY#\'}"; API_KEY="${API_KEY%\'}"
+
+          if [ -z "${API_KEY}" ]; then
+            echo "::error::SUPABASE_ANON_KEY resolved to empty after normalization."
+            echo "Re-create the secret with no quotes or trailing newlines."
             exit 1
           fi
 
           ENDPOINT="${BASE_URL}/rest/v1/"
 
-          # Debug: host and path only — never log the API key
           HOST_PART="$(printf '%s' "${BASE_URL}" | sed -E 's#^https?://([^/]+).*#\1#')"
           echo "Debug — target host: ${HOST_PART}"
           echo "Debug — endpoint path: /rest/v1/"
-          echo "Debug — full URL length: ${#ENDPOINT} chars (scheme + host + path)"
           echo "Pinging Supabase REST API (read-only GET)…"
 
-          # ── Curl with explicit URL handling ───────────────────────────────
           CURL_OUTPUT="$(mktemp)"
           CURL_ERR="$(mktemp)"
           HTTP_CODE="000"
@@ -122,8 +157,8 @@ jobs:
             --retry-connrefused \
             --request GET \
             --url "${ENDPOINT}" \
-            --header "apikey: ${SUPABASE_ANON_KEY}" \
-            --header "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            --header "apikey: ${API_KEY}" \
+            --header "Authorization: Bearer ${API_KEY}" \
             --header "Accept: application/json" \
             2>"${CURL_ERR}")" || CURL_EXIT=$?
 
@@ -132,11 +167,6 @@ jobs:
             if [ -s "${CURL_ERR}" ]; then
               echo "Debug — curl error: $(head -c 300 "${CURL_ERR}")"
             fi
-            if grep -qi "no host part" "${CURL_ERR}" 2>/dev/null; then
-              echo "Hint: SUPABASE_URL secret is malformed — use https://<project-ref>.supabase.co"
-              echo "      Re-create the secret with no quotes, spaces, or trailing newlines."
-            fi
-            echo "Check that SUPABASE_URL is set correctly and reachable from GitHub Actions."
             rm -f "${CURL_OUTPUT}" "${CURL_ERR}"
             exit 1
           fi
@@ -147,7 +177,7 @@ jobs:
             echo "✅ Supabase keep-alive successful (HTTP ${HTTP_CODE}). Project is active."
           else
             echo "::error::Supabase REST API ping failed (HTTP ${HTTP_CODE})."
-            echo "Verify SUPABASE_URL and SUPABASE_ANON_KEY in GitHub Actions secrets."
+            echo "Verify SUPABASE_ANON_KEY in GitHub Actions secrets."
             if [ -s "${CURL_OUTPUT}" ]; then
               echo "Response body (truncated):"
               head -c 500 "${CURL_OUTPUT}"
