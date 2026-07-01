@@ -93,21 +93,32 @@ if (-not $WhatIf) {
     } catch { Write-Host "Cache rules skipped: $($_.Exception.Message)" -ForegroundColor Yellow }
 }
 
-# --- Transform rules ---
-$transformRules = @()
+# --- Transform rules (response + request phases) ---
+$responseRules = @()
+$requestRules = @()
 foreach ($tr in $manifest.transform_rules) {
     $hdrs = @{}
     foreach ($prop in $tr.headers.PSObject.Properties) {
         $hdrs[$prop.Name] = @{ operation = "set"; value = $prop.Value }
     }
-    $transformRules += @{ description = $tr.name; enabled = $true; expression = $tr.expression; action = "rewrite"; action_parameters = @{ headers = $hdrs } }
+    $rule = @{ description = $tr.name; enabled = $true; expression = $tr.expression; action = "rewrite"; action_parameters = @{ headers = $hdrs } }
+    if ($tr.type -eq "request") { $requestRules += $rule } else { $responseRules += $rule }
 }
 if (-not $WhatIf) {
-    try {
-        $body = @{ rules = $transformRules } | ConvertTo-Json -Depth 10
-        Invoke-RestMethod -Method Put -Uri "https://api.cloudflare.com/client/v4/zones/$zone/rulesets/phases/http_response_headers_transform/entrypoint" -Headers $h -Body $body | Out-Null
-        Write-Host "Transform rules applied." -ForegroundColor Green
-    } catch { Write-Host "Transform rules skipped: $($_.Exception.Message)" -ForegroundColor Yellow }
+    if ($responseRules.Count -gt 0) {
+        try {
+            $body = @{ rules = $responseRules } | ConvertTo-Json -Depth 10
+            Invoke-RestMethod -Method Put -Uri "https://api.cloudflare.com/client/v4/zones/$zone/rulesets/phases/http_response_headers_transform/entrypoint" -Headers $h -Body $body | Out-Null
+            Write-Host "Response transform rules applied." -ForegroundColor Green
+        } catch { Write-Host "Response transform skipped: $($_.Exception.Message)" -ForegroundColor Yellow }
+    }
+    if ($requestRules.Count -gt 0) {
+        try {
+            $body = @{ rules = $requestRules } | ConvertTo-Json -Depth 10
+            Invoke-RestMethod -Method Put -Uri "https://api.cloudflare.com/client/v4/zones/$zone/rulesets/phases/http_request_late_transform/entrypoint" -Headers $h -Body $body | Out-Null
+            Write-Host "Request transform rules applied." -ForegroundColor Green
+        } catch { Write-Host "Request transform skipped: $($_.Exception.Message)" -ForegroundColor Yellow }
+    }
 }
 
 # --- Zone settings ---
