@@ -1,0 +1,43 @@
+{
+  "version": "2026-07-01",
+  "zone": "laslogtmx.com",
+  "ssl_tls": {
+    "ssl": "strict",
+    "always_use_https": "on",
+    "min_tls_version": "1.2",
+    "tls_1_3": "on",
+    "automatic_https_rewrites": "on",
+    "hsts": {
+      "enabled": true,
+      "max_age": 31536000,
+      "include_subdomains": true,
+      "preload": false,
+      "note": "Preload submit only after 30+ days stable. Also set in apps/web/public/_headers"
+    }
+  },
+  "speed": {
+    "minify": { "css": "on", "html": "on", "js": "on" },
+    "brotli": "on",
+    "early_hints": "on",
+    "rocket_loader": "off",
+    "note": "Rocket Loader off — breaks Next.js hydration"
+  },
+  "network": {
+    "http3": "on",
+    "websockets": "on",
+    "ipv6": "on",
+    "note": "WebSockets required for Supabase Realtime (chat, notifications)"
+  },
+  "security": {
+    "security_level": "medium",
+    "browser_check": "on",
+    "challenge_ttl": 1800,
+    "privacy_pass": "on"
+  },
+  "caching": {
+    "browser_cache_ttl": 14400,
+    "always_online": "off",
+    "development_mode": "off",
+    "note": "Cache rules in rules-manifest.json override per-path"
+  }
+}

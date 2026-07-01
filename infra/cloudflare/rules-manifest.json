@@ -1,7 +1,9 @@
 {
   "version": "2026-06-21",
   "zone": "laslogtmx.com",
-  "status": "deployed",
+  "status": "partial_deployed",
+  "deployed_via_api": ["waf.custom_rules"],
+  "pending_dashboard_or_token_upgrade": ["redirect_rules", "cache_rules", "transform_rules", "rate_limiting", "zone_settings", "error_pages", "access_dev", "email_routing"],
   "domains": {
     "marketing": "laslogtmx.com",
     "app": "app.laslogtmx.com",

@@ -1,0 +1,29 @@
+{
+  "version": "2026-07-01",
+  "application": {
+    "name": "laslogTMX Staging",
+    "domain": "dev.laslogtmx.com",
+    "type": "self_hosted",
+    "session_duration": "24h"
+  },
+  "policy": {
+    "name": "Staging team access",
+    "decision": "allow",
+    "include": [
+      { "type": "email", "value": "YOUR_EMAIL@example.com", "note": "Replace with your Google/workspace email" }
+    ],
+    "require": [
+      { "type": "email_verification" }
+    ],
+    "purpose": "Prevent public access to staging TMS data and Stripe test mode"
+  },
+  "dashboard_steps": [
+    "1. Zero Trust → Access → Applications → Add application",
+    "2. Type: Self-hosted | Domain: dev.laslogtmx.com",
+    "3. Add policy: Allow emails matching your team addresses",
+    "4. Identity provider: One-time PIN (email) or Google OAuth",
+    "5. Test in incognito — should challenge before dev.laslogtmx.com loads",
+    "6. Do NOT apply Access to app.laslogtmx.com or laslogtmx.com"
+  ],
+  "rollback": "Zero Trust → Access → Applications → laslogTMX Staging → Disable or delete policy"
+}

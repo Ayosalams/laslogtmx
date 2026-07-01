@@ -1,0 +1,34 @@
+{
+  "version": "2026-07-01",
+  "zone": "laslogtmx.com",
+  "status": "pending_go_live",
+  "current_live_dns_audit": {
+    "mx": ["mx1.cloudmail.io", "mx2.cloudmail.io"],
+    "spf": "v=spf1 include:_spf.mx.cloudflare.net ~all",
+    "dmarc": "v=DMARC1; p=quarantine; rua=mailto:security@laslogtmx.com",
+    "conflict": "MX points to cloudmail.io but SPF includes Cloudflare — align before go-live"
+  },
+  "recommended_provider": "cloudflare_email_routing",
+  "addresses": [
+    { "alias": "support@laslogtmx.com", "forward_to": "YOUR_PERSONAL_INBOX@example.com", "purpose": "Customer support" },
+    { "alias": "billing@laslogtmx.com", "forward_to": "YOUR_PERSONAL_INBOX@example.com", "purpose": "Stripe/billing notices" },
+    { "alias": "security@laslogtmx.com", "forward_to": "YOUR_PERSONAL_INBOX@example.com", "purpose": "DMARC reports, security alerts" },
+    { "alias": "noreply@laslogtmx.com", "forward_to": null, "purpose": "Supabase Auth sender — use as custom SMTP From only, no forward" }
+  ],
+  "go_live_steps": [
+    "1. Dashboard → Email → Email Routing → Enable",
+    "2. Add destination address (your inbox) and verify",
+    "3. Create routing rules for support@, billing@, security@",
+    "4. Update MX to Cloudflare Email Routing targets (dashboard provides values)",
+    "5. Update SPF TXT to: v=spf1 include:_spf.mx.cloudflare.net ~all",
+    "6. Enable DKIM (dashboard auto-generates TXT record)",
+    "7. Keep DMARC at p=quarantine until deliverability confirmed, then p=reject",
+    "8. Supabase Auth → SMTP Settings → set noreply@laslogtmx.com as sender (custom SMTP or Resend/SendGrid)",
+    "9. Test send from Supabase confirm-signup template before announcing go-live"
+  ],
+  "rollback": {
+    "restore_mx": ["mx1.cloudmail.io", "mx2.cloudmail.io"],
+    "restore_spf": "v=spf1 include:cloudmail.io ~all",
+    "note": "Screenshot current MX/TXT before any change. TTL 300 = ~5 min recovery."
+  }
+}

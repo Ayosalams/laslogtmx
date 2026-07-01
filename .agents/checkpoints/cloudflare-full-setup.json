@@ -1,0 +1,62 @@
+{
+  "checkpoint": "cloudflare-full-setup",
+  "version": "2026-07-01",
+  "status": "partial_complete",
+  "backup": "C:\\Users\\Ayoni\\OneDrive\\Desktop\\Antigravity\\Backups\\laslogtmx_20260701_0802",
+  "live_audit": {
+    "date": "2026-07-01",
+    "domains_live": {
+      "laslogtmx.com": { "status": 200, "hsts": true },
+      "app.laslogtmx.com": { "status": 200, "hsts": true },
+      "dev.laslogtmx.com": { "status": 200, "hsts": true }
+    },
+    "dns": {
+      "mx": ["mx1.cloudmail.io", "mx2.cloudmail.io"],
+      "spf_conflict": "MX=cloudmail.io but SPF includes _spf.mx.cloudflare.net",
+      "dmarc": "p=quarantine, rua=security@laslogtmx.com",
+      "app_records": "AAAA proxied (Pages)"
+    },
+    "waf_before": ["WAF block AF"],
+    "waf_after_api_apply": ["WAF block AF", "Block known bad bots", "Challenge suspicious signup traffic"],
+    "redirect_cache_transform": "not_applied_api_403_token_permissions",
+    "zone_settings": "not_applied_api_403_token_permissions",
+    "pages_api": "auth_error_token_needs_account_cloudflare_pages_edit"
+  },
+  "applied_via_api": [
+    "WAF custom rules (2 manifest rules + preserved existing AF block)"
+  ],
+  "created_files": [
+    "infra/cloudflare/error-pages/500.html",
+    "infra/cloudflare/error-pages/1000.html",
+    "infra/cloudflare/error-pages/403-access.html",
+    "infra/cloudflare/zone-settings.manifest.json",
+    "infra/cloudflare/email-routing.manifest.json",
+    "infra/cloudflare/access-dev.manifest.json",
+    "infra/cloudflare/pages-env-checklist.json",
+    "infra/cloudflare/apply-zone-config.ps1",
+    "infra/cloudflare/verify-zone-config.ps1",
+    "infra/cloudflare/ROLLBACK.md"
+  ],
+  "manual_dashboard_remaining": [
+    "Upgrade API token: Zone Settings Edit + Account Cloudflare Pages Edit",
+    "Run apply-zone-config.ps1 after token upgrade (redirect, cache, transform, speed, network)",
+    "Upload error pages from infra/cloudflare/error-pages/",
+    "Configure Cloudflare Access on dev.laslogtmx.com (access-dev.manifest.json)",
+    "Set Pages env vars (pages-env-checklist.json)",
+    "Supabase Auth redirect URLs for prod + staging",
+    "Email routing go-live (email-routing.manifest.json) — last step",
+    "Rate limiting rules (3) — dashboard or upgraded token"
+  ],
+  "supabase_production": {
+    "url": "https://gnwufbvrxcvnrfvanmrg.supabase.co",
+    "tables": 17,
+    "staging_project": "separate project required — not same as production"
+  },
+  "token_upgrade_url": "https://dash.cloudflare.com/profile/api-tokens",
+  "recommended_token_permissions": [
+    "Zone.DNS Read",
+    "Zone.WAF Edit",
+    "Zone.Settings Edit",
+    "Account.Cloudflare Pages Edit"
+  ]
+}
